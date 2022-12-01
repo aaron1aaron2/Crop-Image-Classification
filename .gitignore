@@ -1,7 +1,7 @@
 # folder
 data/rawdata(zip)/
 data/rawdata/
-example(spring)/
+example_data/
 
 # file type
 *.zip
