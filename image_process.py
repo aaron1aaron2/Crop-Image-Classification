@@ -12,25 +12,6 @@ import imghdr
 import random
 import argparse
 
-import warnings
-warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
-
-def get_args():
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--config_path', type=str, default='configs/Basic.yaml')
-
-    args = vars(parser.parse_args())
-    config = read_config(args['config_path'])
-    args.update(config)
-
-    return args
-
-root_path = 'rawdata'
-output_folder = 'data/sample200'
-sample_num_per_class = 200
-
-file_ls = [os.path.join(root_path, i) for i in os.listdir(root_path) if i.find('.zip') != -1]
-
 CLASS_ls = [
     'asparagus', 'bambooshoots', 'betel', 'broccoli', 'cauliflower',
     'chinesecabbage', 'chinesechives', 'custardapple', 'grape', 'greenhouse',
@@ -40,18 +21,20 @@ CLASS_ls = [
     'taro', 'tea', 'waterbamboo'
     ]
 
+def get_args():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('--file_folder', type=str, default='data/rawdata')
+    parser.add_argument('--output_folder', type=str, default='data/sample200')
+    parser.add_argument('--class_list', type=str, default='data/class_ls.txt')
 
-# code_name_dt = {i:name for i, name in enumerate(class_ls)} 
+
+    parser.add_argument('--sample_num_per_class', type=int, default=200)
+
+
+    return parser.parse_args()
 
 def get_class(label_code):    
     return CLASS_ls[label_code]
-
-def output_zip(path, image_ls):
-    # 建立 ZIP 壓縮檔
-    with zipfile.ZipFile(path, mode='w') as zf:
-        # 加入要壓縮的檔案
-        for n, i in image_ls:
-            zf.writestr(n, i)
 
 # def read_img(path, image_ls):
 #     images_sample = random.shuffle(images)[:sample_num_per_class]
@@ -74,6 +57,8 @@ for k, v in img_tag_Y_list_dict.items():
     print("{}:  Numbers of crop_img = {}".format(k, len(v)))
 
 def main():
+    args = get_args()
+    file_ls = [os.path.join(root_path, i) for i in os.listdir(root_path)]
 
 
 if __name__ == '__main__':
