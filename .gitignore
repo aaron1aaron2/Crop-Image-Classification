@@ -1,4 +1,7 @@
-# data
-rawdata(zip)/
-rawdata/
-example(spring)/crop image classification
+# folder
+data/rawdata(zip)/
+data/rawdata/
+example(spring)/
+
+# file type
+*.zip
