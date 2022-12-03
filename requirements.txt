@@ -1,4 +1,5 @@
 pandas
 numpy
+tqdm
 opencv-python
 matplotlib
