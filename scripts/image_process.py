@@ -17,7 +17,6 @@ import argparse
 
 import pandas as pd
 
-from IPython import embed
 
 def get_args():
     parser = argparse.ArgumentParser(add_help=False)
@@ -36,9 +35,6 @@ def get_args():
 
 
     return parser.parse_args()
-
-# def read_img(path, image_ls):
-#     images_sample = random.shuffle(images)[:sample_num_per_class]
 
 def crop_img_target(img, plant_class, img_name, img_shape, crop_length):
     """
@@ -118,8 +114,7 @@ def main():
         ))
 
     coor_df.to_csv(os.path.join(args.output_folder, 'image_list.csv'), index=False)
-    embed()
-    exit()
+
 
 
 if __name__ == '__main__':
