@@ -3,6 +3,7 @@ data/rawdata(zip)/
 data/rawdata/
 data/predata/
 example_data/
+sample*/
 
 # file type
 *.zip
