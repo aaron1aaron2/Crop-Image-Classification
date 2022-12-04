@@ -43,12 +43,11 @@ def get_args():
     return parser.parse_args()
 
 def crop_img_target(img_path, img_name, label, crop_length, target_x, target_y, output):
+    # read image
     img = cv2.imread(img_path)
 
     ## img shape info
     img_h, img_w, _ = img.shape
-
-    
     crop_length_half = int(crop_length/2)
 
     ## target location(準心位置) + 防止超出照片
@@ -61,6 +60,7 @@ def crop_img_target(img_path, img_name, label, crop_length, target_x, target_y, 
     aim_x = int(img_w - crop_length_half if (target_x > border_w) else (
                 crop_length_half if (abs(target_x) > border_w) else img_w/2 + target_x
             )) # 上界 -> 下界 -> 正常狀況
+
     ## crop image with target
     crop_h_lower, crop_h_upper = int(aim_y - crop_length_half), int(aim_y + crop_length_half)
     crop_w_lower, crop_w_upper = int(aim_x - crop_length_half), int(aim_x + crop_length_half)
@@ -182,7 +182,6 @@ def main():
     print('Error num:', len(error_ls))
     print('\nFinish!!')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
 
 if __name__ == '__main__':
