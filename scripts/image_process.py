@@ -28,11 +28,13 @@ def get_args():
     parser.add_argument('--img_coordinate_path', type=str, default='data/tag_locCoor.csv')
 
     # output
-    parser.add_argument('--output_folder', type=str, default='data/sample100')
+    parser.add_argument('--output_folder', type=str, default='data/sample100_len200')
 
     # parameters
     parser.add_argument('--sample', type=bool, default=True)
     parser.add_argument('--sample_num_per_class', type=int, default=100)
+
+    parser.add_argument('--crop_length', type=int, default=200)
 
     parser.add_argument('--train_ratio', type=int, default=0.7)
     parser.add_argument('--val_ratio', type=int, default=0.1)
@@ -156,13 +158,12 @@ def main():
     for i in tqdm.tqdm(img_dt):
         try:
             crop_img_target(
-                i['path'], i['Img'], i['label'], 200,   
+                i['path'], i['Img'], i['label'], args.crop_length,   
                 i['target_x'], i['target_y'], 
                 os.path.join(args.output_folder, i['split'], i['Img'])
                 )
         except:
             error_ls.append(i['TARGET_FID'])
-            exit()
     
     with open(os.path.join(args.output_folder, 'error.txt')) as f:
         f.writelines(error_ls)
