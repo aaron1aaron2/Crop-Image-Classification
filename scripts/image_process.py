@@ -28,11 +28,11 @@ def get_args():
     parser.add_argument('--img_coordinate_path', type=str, default='data/tag_locCoor.csv')
 
     # output
-    parser.add_argument('--output_folder', type=str, default='data/sample200')
+    parser.add_argument('--output_folder', type=str, default='data/sample100')
 
     # parameters
     parser.add_argument('--sample', type=bool, default=True)
-    parser.add_argument('--sample_num_per_class', type=int, default=200)
+    parser.add_argument('--sample_num_per_class', type=int, default=100)
 
     parser.add_argument('--train_ratio', type=int, default=0.7)
     parser.add_argument('--val_ratio', type=int, default=0.1)
@@ -47,16 +47,22 @@ def crop_img_target(img_path, img_name, label, crop_length, target_x, target_y, 
     ## img shape info
     img_h, img_w, _ = img.shape
 
-    ## target location(準心位置)
-    aim_y = int(img_w/2 + target_y)
-    aim_x = int(img_h/2 + target_x)
+    
+    crop_length_half = int(crop_length/2)
+
+    ## target location(準心位置) + 防止超出照片
+    aim_y = int(img_h/2 + target_y) if (target_y < img_h/2) else int(img_h-crop_length_half)
+    aim_x = int(img_w/2 + target_x) if (target_x < img_w/2) else int(img_w-crop_length_half)
 
     ## crop image with target
-    crop_h_lower, crop_h_upper = int(aim_y - crop_length), int(aim_y + crop_length)
-    crop_w_lower, crop_w_upper = int(aim_x - crop_length), int(aim_x + crop_length)
-    
-    crop_img = img[crop_w_lower:crop_w_upper, crop_h_lower:crop_h_upper]  
+    crop_h_lower, crop_h_upper = int(aim_y - crop_length_half), int(aim_y + crop_length_half)
+    crop_w_lower, crop_w_upper = int(aim_x - crop_length_half), int(aim_x + crop_length_half)
+
+    crop_img = img[crop_h_lower:crop_h_upper, crop_w_lower:crop_w_upper]  
+
+    ## output
     cv2.imwrite(output, crop_img)
+    # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
 
     return img_name, crop_img
 
@@ -143,7 +149,7 @@ def main():
 
 
     # 準心圍中心裁切 >>>>>>>>>>>>>>>>>>>>>
-    print('Croping image..')
+    print('Croping image..\n')
     img_dt = coor_df.to_dict(orient='records')
 
     error_ls = []
@@ -156,6 +162,13 @@ def main():
                 )
         except:
             error_ls.append(i['TARGET_FID'])
+            exit()
+    
+    with open(os.path.join(args.output_folder, 'error.txt')) as f:
+        f.writelines(error_ls)
+
+    print('Error num:', len(error_ls))
+    print('\n\n Finish!!')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
