@@ -11,9 +11,8 @@ import os
 import cv2
 import glob
 import tqdm
-import random
+import shutil
 import argparse
-
 
 import pandas as pd
 
@@ -28,7 +27,7 @@ def get_args():
     parser.add_argument('--img_coordinate_path', type=str, default='data/tag_locCoor.csv')
 
     # output
-    parser.add_argument('--output_folder', type=str, default='data/sample100_len200')
+    parser.add_argument('--output_folder', type=str, default='data/sample100_200x200')
 
     # parameters
     parser.add_argument('--sample', type=bool, default=True)
@@ -53,9 +52,15 @@ def crop_img_target(img_path, img_name, label, crop_length, target_x, target_y, 
     crop_length_half = int(crop_length/2)
 
     ## target location(準心位置) + 防止超出照片
-    aim_y = int(img_h/2 + target_y) if (target_y < img_h/2) else int(img_h-crop_length_half)
-    aim_x = int(img_w/2 + target_x) if (target_x < img_w/2) else int(img_w-crop_length_half)
+    border_h = img_h/2 - crop_length_half
+    border_w = img_w/2 - crop_length_half
 
+    aim_y = int(img_h - crop_length_half if (target_y > border_h) else (
+                crop_length_half if (abs(target_y) > border_h) else img_h/2 + target_y
+            )) # 上界 -> 下界 -> 正常狀況
+    aim_x = int(img_w - crop_length_half if (target_x > border_w) else (
+                crop_length_half if (abs(target_x) > border_w) else img_w/2 + target_x
+            )) # 上界 -> 下界 -> 正常狀況
     ## crop image with target
     crop_h_lower, crop_h_upper = int(aim_y - crop_length_half), int(aim_y + crop_length_half)
     crop_w_lower, crop_w_upper = int(aim_x - crop_length_half), int(aim_x + crop_length_half)
@@ -73,8 +78,9 @@ def main():
 
     # 資料讀取 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # os.makedirs(args.output_folder, exist_ok=True)
-    for i in ['train', 'val', 'test']:
+    for i in ['train', 'val', 'test', 'error']:
         os.makedirs(os.path.join(args.output_folder, i), exist_ok=True)
+    
     class_detected_ls = os.listdir(args.file_folder)
     class_folder_ls = [(i, os.path.join(args.file_folder, i)) for i in class_detected_ls]
 
@@ -135,9 +141,9 @@ def main():
     n = len(coor_df)
     train_n, val_n, test_n = train.shape[0], val.shape[0], test.shape[0]
     print(
-        'Train: {} ({:.2f}%)\n'.format(train_n, train_n/n),
-        'Val: {} ({:.2f}%)\n'.format(val_n, val_n/n),
-        'Test: {} ({:.2f}%)\n'.format(test_n, test_n/n)
+        'Train: {} ({:.2f}%)'.format(train_n, train_n/n),
+        '\nVal: {} ({:.2f}%)'.format(val_n, val_n/n),
+        '\nTest: {} ({:.2f}%)\n'.format(test_n, test_n/n)
     )
 
     coor_df.loc[train.index, 'split'] = 'train'
@@ -150,7 +156,7 @@ def main():
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-    # 準心圍中心裁切 >>>>>>>>>>>>>>>>>>>>>
+    # 準心中心裁切 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     print('Croping image..\n')
     img_dt = coor_df.to_dict(orient='records')
 
@@ -163,13 +169,18 @@ def main():
                 os.path.join(args.output_folder, i['split'], i['Img'])
                 )
         except:
-            error_ls.append(i['TARGET_FID'])
-    
-    with open(os.path.join(args.output_folder, 'error.txt')) as f:
+            ## output
+            cv2.imwrite(os.path.join(args.output_folder, 'error', i['Img']), f"{i['label']}_{i['Img']}")
+            error_ls.append(i['path'])
+
+    with open(os.path.join(args.output_folder, 'error.txt'), 'w') as f:
         f.writelines(error_ls)
 
+    if len(error_ls) == 0:
+        shutil.rmtree(os.path.join(args.output_folder, 'error'), ignore_errors=True)
+
     print('Error num:', len(error_ls))
-    print('\n\n Finish!!')
+    print('\nFinish!!')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
