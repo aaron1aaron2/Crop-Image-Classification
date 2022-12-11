@@ -8,6 +8,8 @@ Describe: 工具箱
 import json
 import time
 
+import matplotlib.pyplot as plt
+
 from pathlib import Path
 from functools import wraps
 
@@ -33,3 +35,14 @@ def timer(func):
         print(f'[timeuse] {round(t_count, 5)} seconds')
         return value
     return wrap
+
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def plot_train_val_loss(train_total_loss, val_total_loss, file_path):
+    plt.figure(figsize=(10, 5))
+    plt.plot(range(1, len(train_total_loss) + 1), train_total_loss, c='b', marker='s', label='Train')
+    plt.plot(range(1, len(val_total_loss) + 1), val_total_loss, c='r', marker='o', label='Validation')
+    plt.legend(loc='best')
+    plt.title('Train loss vs Validation loss')
+    plt.savefig(file_path)
