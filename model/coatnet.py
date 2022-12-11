@@ -8,13 +8,9 @@ Describe: coatnet 模型
 import torch
 import torch.nn as nn
 
-import torchvision.transforms as transforms
-from torchvision import datasets
-
 from einops import rearrange
 from einops.layers.torch import Rearrange
 
-from tqdm.auto import tqdm
 
 def conv_3x3_bn(inp, oup, image_size, downsample=False):
     stride = 1 if downsample == False else 2
@@ -215,83 +211,3 @@ class CoAtNet(nn.Module):
             else:
                 layers.append(block(oup, oup, image_size))
         return nn.Sequential(*layers)
-
-
-
-
-device = torch.device("cuda")
-
-
-def train_model(model, dataloaders_dict, criterion, optimizer, num_epochs):
-    best_acc = 0.0
-    for epoch in range(num_epochs):
-        model.cuda()
-        for phase in ['train', 'val']:
-            if phase == 'train':
-                model.train()
-            else:
-                model.eval()
-
-            epoch_loss = 0.0
-            epoch_acc = 0
-
-            dataloader = dataloaders_dict[phase]
-            for item in tqdm(dataloader, leave=False):
-                images = item[0].cuda().float()
-                classes = item[1].cuda().long()
-                optimizer.zero_grad()
-                with torch.set_grad_enabled(phase == 'train'):
-                    output = model(images)
-                    loss = criterion(output, classes)
-                    _, preds = torch.max(output, 1)
-                    if phase == 'train':
-                        loss.backward()
-                        optimizer.step()
-                    epoch_loss += loss.item() * len(output)
-                    epoch_acc += torch.sum(preds == classes.data)
-            data_size = len(dataloader.dataset)
-            epoch_loss = epoch_loss / data_size
-            epoch_acc = epoch_acc.double() / data_size
-            print(f'Epoch {epoch + 1}/{num_epochs} | {phase:^5} | Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.4f}')
-        if epoch_acc > best_acc:
-            traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, 224, 224))
-            traced.save('model4.pth')
-            best_acc = epoch_acc
-
-num_blocks = [2, 2, 12, 28, 2]
-channels = [64, 64, 128, 256, 512]
-
-model = CoAtNet((224, 224), 3, num_blocks, channels, num_classes=33).to(device)
-BATCH_SIZE = 32
-
-
-
-transform_train = transforms.Compose([
-    transforms.RandomRotation(90),
-    transforms.Resize((224,224)),
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-])
-
-transform_test = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-])
-
-train_data = datasets.ImageFolder('C:/pre', transform=transform_train)
-print(train_data.class_to_idx)
-train_size = int(0.8 * len(train_data))
-valid_size = len(train_data) - train_size
-trainset, testset = torch.utils.data.random_split(train_data, [train_size, valid_size])
-
-train_loader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0, pin_memory=True)
-
-
-val_loader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
-
-
-dataloaders_dict = {"train": train_loader, "val": val_loader}
-criterion = nn.CrossEntropyLoss()
-
-optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
-train_model(model, dataloaders_dict, criterion, optimizer, 25)
