@@ -16,7 +16,6 @@ import argparse
 
 import pandas as pd
 
-
 def get_args():
     parser = argparse.ArgumentParser(add_help=False)
     
@@ -27,7 +26,7 @@ def get_args():
     parser.add_argument('--img_coordinate_path', type=str, default='data/tag_locCoor.csv')
 
     # output
-    parser.add_argument('--output_folder', type=str, default='data/sample100_200x200')
+    parser.add_argument('--output_folder', type=str, default='data/sample')
 
     # parameters
     parser.add_argument('--sample', type=bool, default=True)
@@ -35,14 +34,14 @@ def get_args():
 
     parser.add_argument('--crop_length', type=int, default=200)
 
-    parser.add_argument('--train_ratio', type=int, default=0.7)
-    parser.add_argument('--val_ratio', type=int, default=0.1)
-    parser.add_argument('--test_ratio', type=int, default=0.2)
+    parser.add_argument('--train_ratio', type=float, default=0.7)
+    parser.add_argument('--val_ratio', type=float, default=0.1)
+    parser.add_argument('--test_ratio', type=float, default=0.2)
 
 
     return parser.parse_args()
 
-def crop_img_target(img_path, img_name, label, crop_length, target_x, target_y, output):
+def crop_img_target(img_path, img_name, crop_length, target_x, target_y, output):
     # read image
     img = cv2.imread(img_path)
 
@@ -75,14 +74,16 @@ def crop_img_target(img_path, img_name, label, crop_length, target_x, target_y, 
 
 def main():
     args = get_args()
+    print('\n', args, '\n')
 
     # 資料讀取 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # os.makedirs(args.output_folder, exist_ok=True)
-    for i in ['train', 'val', 'test', 'error']:
-        os.makedirs(os.path.join(args.output_folder, i), exist_ok=True)
-    
     class_detected_ls = os.listdir(args.file_folder)
     class_folder_ls = [(i, os.path.join(args.file_folder, i)) for i in class_detected_ls]
+
+    os.makedirs(os.path.join(args.output_folder, 'error'), exist_ok=True)
+    for split in ['train', 'val', 'test']:
+        for class_ in class_detected_ls:
+            os.makedirs(os.path.join(args.output_folder, split, class_), exist_ok=True)
 
     coor_df = pd.read_csv('data/tag_locCoor.csv', encoding='big5', usecols=['TARGET_FID', 'Img', 'target_x', 'target_y'])
     
@@ -164,12 +165,11 @@ def main():
     for i in tqdm.tqdm(img_dt):
         try:
             crop_img_target(
-                i['path'], i['Img'], i['label'], args.crop_length,   
+                i['path'], i['Img'], args.crop_length,   
                 i['target_x'], i['target_y'], 
-                os.path.join(args.output_folder, i['split'], i['Img'])
+                os.path.join(args.output_folder, i['split'], i['label'], i['Img'])
                 )
         except:
-            ## output
             cv2.imwrite(os.path.join(args.output_folder, 'error', i['Img']), f"{i['label']}_{i['Img']}")
             error_ls.append(i['path'])
 
