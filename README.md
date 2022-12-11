@@ -25,11 +25,11 @@ Crop-Image-Classification
 ```
 ## 🖥️ Environment settings 
 ### `pytorch`
-本專案是在 window 11、cuda(11.6)、pytorch(1.13.1)測試。
-如使用不同環境請到 [pytorch 官網](https://pytorch.org/) 選擇對應版的指令。
 ```shell
 pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
 ```
+- 本專案是在 window 11、cuda(11.6)、pytorch(1.13.0)測試。
+- 如使用不同環境請到 [pytorch 官網](https://pytorch.org/) 選擇對應版的指令。
 
 ### `other packages`
 ```shell
