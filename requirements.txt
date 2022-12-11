@@ -1,5 +1,6 @@
-pandas
-numpy
 tqdm
-opencv-python
+numpy
+einops
+pandas
 matplotlib
+opencv-python
