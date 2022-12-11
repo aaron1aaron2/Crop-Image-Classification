@@ -15,13 +15,16 @@ import os
 import argparse
 import torch
 import torch.nn as nn
+import torch.optim as optim
 
 from tqdm import tqdm
 
 #  import torchvision.transforms as transforms
 from torchvision import datasets, transforms
 
-from utils import saveJson, build_folder, log_string
+from utils import *
+
+from model import CoAtNet
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -51,13 +54,6 @@ def get_args():
     parser.add_argument('--decay_epoch', type=int, default=10,
                         help='decay epoch')
 
-    parser.add_argument('--image_folder', default='./model/data/pems-bay.h5',
-                        help='traffic file')
-    parser.add_argument('--model_file', default='./output/GMAN.pkl',
-                        help='save the model to disk')
-    parser.add_argument('--log_file', default='./output/log.txt',
-                        help='log file')
-
     parser.add_argument('--output_folder', type=str, default='./output')
     parser.add_argument('--device', default='gpu', 
                         help='cpu or cuda')
@@ -66,9 +62,13 @@ def get_args():
 
     return args
 
-def train_model(model, dataloaders_dict, criterion, optimizer, num_epochs):
+def train_model(model, dataloaders_dict, criterion, optimizer, scheduler, num_epochs, patience):
     best_acc = 0.0
+    wait = 0
     for epoch in range(num_epochs):
+        if wait >= args.patience:
+            log_string(log, f'early stop at epoch: {epoch:04d}')
+            break
         model.cuda()
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -97,33 +97,40 @@ def train_model(model, dataloaders_dict, criterion, optimizer, num_epochs):
             epoch_loss = epoch_loss / data_size
             epoch_acc = epoch_acc.double() / data_size
             print(f'Epoch {epoch + 1}/{num_epochs} | {phase:^5} | Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.4f}')
+
+        scheduler.step()
         if epoch_acc > best_acc:
             traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, 224, 224))
-            traced.save('model4.pth')
-            best_acc = epoch_acc
+            traced.save(args.model_file)
+            # best_model_wts = model.state_dict()
+            log_string(log, f'val loss decrease from {best_acc:.4f} to {epoch_acc:.4f}, saving model to {args.model_file}')
 
+            best_acc = epoch_acc
+            wait = 0
+        else:
+            wait += 1
+    # model.load_state_dict(best_model_wts)
+    # torch.save(model, args.model_file)
+    log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
 
 if __name__ == '__main__':
     args = get_args()
-    output_folder = os.path.dirname(args.log_file)
     args.device = 'cuda' if torch.cuda.is_available() and args.device in ['gpu', 'cuda'] else 'cpu'
+
     fig_folder = os.path.join(args.output_folder, 'figure')
+
     build_folder(args.output_folder)
     build_folder(fig_folder)
 
-    log = open(args.log_file, 'w')
+    log = open(os.path.join(args.output_folder, 'log.txt'), 'w')
     log_string(log, str(args)[10: -1])
-    log_string(log, f'main output folder{output_folder}')
+    log_string(log, f'main output folder{args.output_folder}')
 
-    device = torch.device("cuda")
+    saveJson(args.__dict__, os.path.join(args.output_folder, 'configures.json'))
 
-    num_blocks = [2, 2, 12, 28, 2]
-    channels = [64, 64, 128, 256, 512]
-
-    model = CoAtNet((224, 224), 3, num_blocks, channels, num_classes=33).to(device)
     BATCH_SIZE = 32
-
-
+    # load data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    log_string(log, 'loading data...')
 
     transform_train = transforms.Compose([
         transforms.RandomRotation(90),
@@ -138,7 +145,7 @@ if __name__ == '__main__':
     ])
 
     train_data = datasets.ImageFolder('C:/pre', transform=transform_train)
-    print(train_data.class_to_idx)
+    log_string(log, f'{train_data.class_to_idx}')
     train_size = int(0.8 * len(train_data))
     valid_size = len(train_data) - train_size
     trainset, testset = torch.utils.data.random_split(train_data, [train_size, valid_size])
@@ -148,9 +155,41 @@ if __name__ == '__main__':
 
     val_loader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
 
+    # log_string(log, f'trainX: {trainX.shape}\t\t trainY: {trainY.shape}')
+    # log_string(log, f'valX:   {valX.shape}\t\tvalY:   {valY.shape}')
+    # log_string(log, f'testX:   {testX.shape}\t\ttestY:   {testY.shape}')
+    log_string(log, 'data loaded!')
 
     dataloaders_dict = {"train": train_loader, "val": val_loader}
-    criterion = nn.CrossEntropyLoss()
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
-    train_model(model, dataloaders_dict, criterion, optimizer, 25)
+    # build model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    log_string(log, 'compiling model...')
+
+    num_blocks = [2, 2, 12, 28, 2]
+    channels = [64, 64, 128, 256, 512]
+
+    # image_size, in_channels, num_blocks, channels, num_classes, block_types{'C': MBConv, 'T': Transformer}
+    model = CoAtNet((224, 224), 3, num_blocks, channels, num_classes=33).to(args.device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
+    scheduler = optim.lr_scheduler.StepLR(optimizer,
+                                        step_size=args.decay_epoch,
+                                        gamma=0.9)
+    
+    parameters = count_parameters(model)
+    log_string(log, 'trainable parameters: {:,}'.format(parameters))
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    # train model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    log_string(log, 'training model...')
+    train_model(model, dataloaders_dict, criterion, optimizer, scheduler, args.max_epoch, args.patience)
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    # test model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # plot_train_val_loss(loss_train, loss_val, 
+    #             os.path.join(fig_folder, 'train_val_loss.png'))
+    # trainPred, valPred, testPred, eval_dt = test(args, log)
+    # saveJson(eval_dt, os.path.join(output_folder, 'evaluation.json'))
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
