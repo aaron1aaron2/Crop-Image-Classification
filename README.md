@@ -1,5 +1,4 @@
-# Crop-Image-Classification
-AIcup
+# Crop-Image-Classification (AIcup 2022)
 
 # Reproduce
 ## 📁 Folder schema 
@@ -13,11 +12,13 @@ Crop-Image-Classification
 
     |-- model: 模型
 
+    |-- notebook: 分析視覺化
+
     |-- output: 輸出 log 和 model
 
     |-- scripts: shell or batch 腳本，包含批次跑實驗、訓練範例
 
-    |-- notebook: 分析視覺化
+    |-- tests: 測試檔
 
     |- requirements.txt: python 依賴套件
     |- data_helper.py: 將輸入資料(data/input)依造參數設定檔(configs)轉換成訓練資料(data/train_data)
