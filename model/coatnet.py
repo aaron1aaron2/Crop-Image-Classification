@@ -1,3 +1,10 @@
+"""
+Author: 林政委
+Email: 
+Create Date: 2022.12.10
+Last Update: 2022.12.10
+Describe: coatnet 模型
+"""
 import torch
 import torch.nn as nn
 
