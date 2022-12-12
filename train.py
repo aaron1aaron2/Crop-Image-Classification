@@ -29,12 +29,7 @@ from model import CoAtNet
 def get_args():
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument('--L', type=int, default=1,
-    #                     help='number of STAtt Blocks')
-    # parser.add_argument('--K', type=int, default=8,
-    #                     help='number of attention heads')
-    # parser.add_argument('--d', type=int, default=8,
-    #                     help='dims of each head attention outputs')
+    parser.add_argument('--output_folder', type=str, default='./output')
 
     parser.add_argument('--train_ratio', type=float, default=0.8,
                         help='training set [default : 0.7]')
@@ -45,6 +40,8 @@ def get_args():
 
     parser.add_argument('--batch_size', type=int, default=24,
                         help='batch size')
+    parser.add_argument('--val_batch_size', type=int, default=100,
+                        help='val batch size')
     parser.add_argument('--max_epoch', type=int, default=50,
                         help='epoch to run')
     parser.add_argument('--patience', type=int, default=50,
@@ -66,7 +63,7 @@ def train_model(model, dataloaders_dict, criterion, optimizer, scheduler, num_ep
     best_acc = 0.0
     wait = 0
     for epoch in range(num_epochs):
-        if wait >= args.patience:
+        if wait >= patience:
             log_string(log, f'early stop at epoch: {epoch:04d}')
             break
         model.cuda()
@@ -128,7 +125,6 @@ if __name__ == '__main__':
 
     saveJson(args.__dict__, os.path.join(args.output_folder, 'configures.json'))
 
-    BATCH_SIZE = 32
     # load data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'loading data...')
 
@@ -150,10 +146,8 @@ if __name__ == '__main__':
     valid_size = len(train_data) - train_size
     trainset, testset = torch.utils.data.random_split(train_data, [train_size, valid_size])
 
-    train_loader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0, pin_memory=True)
-
-
-    val_loader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
+    train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=True)
+    val_loader = torch.utils.data.DataLoader(testset, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
 
     # log_string(log, f'trainX: {trainX.shape}\t\t trainY: {trainY.shape}')
     # log_string(log, f'valX:   {valX.shape}\t\tvalY:   {valY.shape}')
