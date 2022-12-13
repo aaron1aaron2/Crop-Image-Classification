@@ -33,6 +33,9 @@ def get_args():
     parser.add_argument('--img_height', type=int, default=200)
     parser.add_argument('--img_width', type=int, default=200)
 
+    parser.add_argument('-l','--list', nargs='+', help='Set flag') # python arg.py -l 1234 2345 3456 4567
+
+
     parser.add_argument('--batch_size', type=int, default=24,
                         help='batch size')
     parser.add_argument('--val_batch_size', type=int, default=100,
