@@ -29,14 +29,9 @@ from model import CoAtNet
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--output_folder', type=str, default='./output')
-
-    parser.add_argument('--train_ratio', type=float, default=0.8,
-                        help='training set [default : 0.7]')
-    parser.add_argument('--val_ratio', type=float, default=0.1,
-                        help='validation set [default : 0.1]')
-    parser.add_argument('--test_ratio', type=float, default=0.1,
-                        help='testing set [default : 0.2]')
+    parser.add_argument('--data_folder', type=str, default='data/sample100_200x200')
+    parser.add_argument('--img_height', type=int, default=200)
+    parser.add_argument('--img_width', type=int, default=200)
 
     parser.add_argument('--batch_size', type=int, default=24,
                         help='batch size')
@@ -164,7 +159,7 @@ if __name__ == '__main__':
     channels = [64, 64, 128, 256, 512]
 
     # image_size, in_channels, num_blocks, channels, num_classes, block_types{'C': MBConv, 'T': Transformer}
-    model = CoAtNet((224, 224), 3, num_blocks, channels, num_classes=33).to(args.device)
+    model = CoAtNet((args.img_height, args.img_width), 3, num_blocks, channels, num_classes=33).to(args.device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
