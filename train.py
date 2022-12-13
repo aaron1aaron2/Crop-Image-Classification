@@ -30,10 +30,12 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--data_folder', type=str, default='data/sample100_200x200')
+
     parser.add_argument('--img_height', type=int, default=200)
     parser.add_argument('--img_width', type=int, default=200)
 
-    parser.add_argument('-l','--list', nargs='+', help='Set flag') # python arg.py -l 1234 2345 3456 4567
+    parser.add_argument('--num_blocks', nargs='+', default=[2, 2, 12, 28, 2], help='Set flag') # python arg.py -l 1234 2345 3456 4567
+    parser.add_argument('--channels', nargs='+', default=[64, 64, 128, 256, 512], help='Set flag') # python arg.py -l 1234 2345 3456 4567
 
 
     parser.add_argument('--batch_size', type=int, default=24,
@@ -57,7 +59,7 @@ def get_args():
 
     return args
 
-def train_model(model, dataloaders_dict, criterion, optimizer, scheduler, num_epochs, patience):
+def train_model(log, model, dataloaders_dict, criterion, optimizer, scheduler, num_epochs, patience):
     best_acc = 0.0
     wait = 0
     for epoch in range(num_epochs):
@@ -88,10 +90,11 @@ def train_model(model, dataloaders_dict, criterion, optimizer, scheduler, num_ep
                         optimizer.step()
                     epoch_loss += loss.item() * len(output)
                     epoch_acc += torch.sum(preds == classes.data)
+
             data_size = len(dataloader.dataset)
             epoch_loss = epoch_loss / data_size
             epoch_acc = epoch_acc.double() / data_size
-            print(f'Epoch {epoch + 1}/{num_epochs} | {phase:^5} | Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.4f}')
+            log_string(log, f'Epoch {epoch + 1}/{num_epochs} | {phase:^5} | Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.4f}')
 
         scheduler.step()
         if epoch_acc > best_acc:
@@ -139,30 +142,30 @@ if __name__ == '__main__':
     ])
 
     train_data = datasets.ImageFolder('C:/pre', transform=transform_train)
+    val_data = datasets.ImageFolder('C:/pre', transform=transform_train)
+    test_data = datasets.ImageFolder('C:/pre', transform=transform_train)
+
     log_string(log, f'{train_data.class_to_idx}')
-    train_size = int(0.8 * len(train_data))
-    valid_size = len(train_data) - train_size
-    trainset, testset = torch.utils.data.random_split(train_data, [train_size, valid_size])
+
 
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=True)
     val_loader = torch.utils.data.DataLoader(testset, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
+    test_loader = torch.utils.data.DataLoader(testset, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
 
+
+    dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader}
     # log_string(log, f'trainX: {trainX.shape}\t\t trainY: {trainY.shape}')
     # log_string(log, f'valX:   {valX.shape}\t\tvalY:   {valY.shape}')
     # log_string(log, f'testX:   {testX.shape}\t\ttestY:   {testY.shape}')
     log_string(log, 'data loaded!')
 
-    dataloaders_dict = {"train": train_loader, "val": val_loader}
+    
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # build model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'compiling model...')
-
-    num_blocks = [2, 2, 12, 28, 2]
-    channels = [64, 64, 128, 256, 512]
-
     # image_size, in_channels, num_blocks, channels, num_classes, block_types{'C': MBConv, 'T': Transformer}
-    model = CoAtNet((args.img_height, args.img_width), 3, num_blocks, channels, num_classes=33).to(args.device)
+    model = CoAtNet((args.img_height, args.img_width), 3, args.num_blocks, args.channels, num_classes=33).to(args.device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
@@ -176,7 +179,7 @@ if __name__ == '__main__':
 
     # train model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'training model...')
-    train_model(model, dataloaders_dict, criterion, optimizer, scheduler, args.max_epoch, args.patience)
+    train_model(log, model, dataloaders_dict, criterion, optimizer, scheduler, args.max_epoch, args.patience)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # test model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
