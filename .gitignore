@@ -8,3 +8,6 @@ sample*/
 # file type
 *.zip
 *.ini
+
+# python 
+__pycache__/
