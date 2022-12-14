@@ -24,19 +24,19 @@ from torchvision import datasets, transforms
 
 from utils import *
 
-from model import CoAtNet
+from model.coatnet import CoAtNet
 
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--data_folder', type=str, default='data/sample100_200x200')
+    parser.add_argument('--data_folder', type=str, default='data/sample200_L200')
 
     parser.add_argument('--img_height', type=int, default=200)
     parser.add_argument('--img_width', type=int, default=200)
 
-    parser.add_argument('--num_blocks', nargs='+', default=[2, 2, 12, 28, 2], help='Set flag') # python arg.py -l 1234 2345 3456 4567
-    parser.add_argument('--channels', nargs='+', default=[64, 64, 128, 256, 512], help='Set flag') # python arg.py -l 1234 2345 3456 4567
-
+    parser.add_argument('--num_blocks', nargs='+', default=[2, 2, 12, 28, 2], help='Set num_blocks') # python arg.py -l 1234 2345 3456 4567
+    parser.add_argument('--channels', nargs='+', default=[64, 64, 128, 256, 512], help='Set channels') 
+    parser.add_argument('--in_channels', type=int, default=3, help='Set in_channels') 
 
     parser.add_argument('--batch_size', type=int, default=24,
                         help='batch size')
@@ -51,7 +51,7 @@ def get_args():
     parser.add_argument('--decay_epoch', type=int, default=10,
                         help='decay epoch')
 
-    parser.add_argument('--output_folder', type=str, default='./output')
+    parser.add_argument('--output_folder', type=str, default='./output/sample')
     parser.add_argument('--device', default='gpu', 
                         help='cpu or cuda')
 
@@ -112,20 +112,29 @@ def train_model(log, model, dataloaders_dict, criterion, optimizer, scheduler, n
     log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
 
 if __name__ == '__main__':
+    # 參數
     args = get_args()
     args.device = 'cuda' if torch.cuda.is_available() and args.device in ['gpu', 'cuda'] else 'cpu'
+    args.num_blocks =[int(i) for i in args.num_blocks]
+    args.channels =[int(i) for i in args.channels]
 
+    # 路徑
     fig_folder = os.path.join(args.output_folder, 'figure')
 
     build_folder(args.output_folder)
     build_folder(fig_folder)
 
+    # config
+    saveJson(args.__dict__, os.path.join(args.output_folder, 'configures.json'))
+
+    # log
     log = open(os.path.join(args.output_folder, 'log.txt'), 'w')
     log_string(log, str(args)[10: -1])
     log_string(log, f'main output folder{args.output_folder}')
 
-    saveJson(args.__dict__, os.path.join(args.output_folder, 'configures.json'))
-
+    from IPython import embed
+    embed()
+    exit()
     # load data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'loading data...')
 
@@ -148,9 +157,9 @@ if __name__ == '__main__':
     log_string(log, f'{train_data.class_to_idx}')
 
 
-    train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=True)
-    val_loader = torch.utils.data.DataLoader(testset, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
-    test_loader = torch.utils.data.DataLoader(testset, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=True)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
 
 
     dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader}
@@ -165,7 +174,7 @@ if __name__ == '__main__':
     # build model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'compiling model...')
     # image_size, in_channels, num_blocks, channels, num_classes, block_types{'C': MBConv, 'T': Transformer}
-    model = CoAtNet((args.img_height, args.img_width), 3, args.num_blocks, args.channels, num_classes=33).to(args.device)
+    model = CoAtNet((args.img_height, args.img_width), args.in_channels, args.num_blocks, args.channels, num_classes=33).to(args.device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
