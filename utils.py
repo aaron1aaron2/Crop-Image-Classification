@@ -7,6 +7,7 @@ Describe: 工具箱
 """
 import json
 import time
+import argparse
 
 import matplotlib.pyplot as plt
 
@@ -38,6 +39,16 @@ def timer(func):
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def plot_train_val_loss(train_total_loss, val_total_loss, file_path):
     plt.figure(figsize=(10, 5))
