@@ -1,5 +1,6 @@
 tqdm
 numpy
+psutil
 einops
 pandas
 matplotlib
