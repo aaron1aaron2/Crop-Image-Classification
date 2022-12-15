@@ -193,11 +193,11 @@ class CoAtNet(nn.Module):
         self.fc = nn.Linear(channels[-1], num_classes, bias=False)
 
     def forward(self, x):
-        x = self.s0(x)
-        x = self.s1(x)
-        x = self.s2(x)
-        x = self.s3(x)
-        x = self.s4(x)
+        x = self.s0(x) # [5, 64, 112, 112]
+        x = self.s1(x) # [5, 64, 56, 56]
+        x = self.s2(x) # [5, 128, 28, 28]
+        x = self.s3(x) # [5, 256, 14, 14]
+        x = self.s4(x) # [5, 512, 7, 7]
 
         x = self.pool(x).view(-1, x.shape[1])
         x = self.fc(x)
