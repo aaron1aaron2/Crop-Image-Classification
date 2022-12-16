@@ -28,6 +28,7 @@ from utils import *
 
 from model.coatnet import CoAtNet
 
+
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -110,7 +111,6 @@ def log_system_info(args, log):
     cuda_divice = torch.cuda.get_device_name() if torch.cuda.is_available() else 'CPU'
     message += f'Train with the {args.device}({cuda_divice})\n'
     log_string(log, '='*20 + '\n' + message + '='*20)
-
 
 def load_data(args, log):
     transform_train = transforms.Compose([
