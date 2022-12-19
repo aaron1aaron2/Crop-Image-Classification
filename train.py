@@ -3,7 +3,7 @@
 Author: yen-nan ho
 Contact: aaron1aaron2@gmail.com
 Create Date: 2022.12.10
-Last Update: 2022.12.11
+Last Update: 2022.12.19
 
 [Original]
 Author: 林政委
@@ -12,20 +12,22 @@ GitHub: https://github.com/VincLee8188/GMAN-PyTorch
 Describe: train pipeline
 """
 import os
+import time
 import psutil
 import platform
 import argparse
+import datetime
+import warnings
+warnings.filterwarnings("ignore")
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
 from tqdm import tqdm
-
-#  import torchvision.transforms as transforms
 from torchvision import datasets, transforms
 
 from utils import *
-
 from model.coatnet import CoAtNet
 
 
@@ -33,15 +35,15 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     # 輸入
-    parser.add_argument('--data_folder', type=str, default='data/sample200_L200')
+    parser.add_argument('--data_folder', type=str, default='data/test_sample10_L96')
 
     # 輸出
-    parser.add_argument('--output_folder', type=str, default='./output/sample')
-    parser.add_argument('--use_Tracedmodule', type=str2bool, default=True)
+    parser.add_argument('--output_folder', type=str, default='output/test_sample')
+    parser.add_argument('--use_tracedmodule', type=str2bool, default=True)
 
     # 前處理
-    parser.add_argument('--img_height', type=int, default=224) # 32 倍數
-    parser.add_argument('--img_width', type=int, default=224) # 32 倍數
+    parser.add_argument('--img_height', type=int, default=128) # 32 倍數
+    parser.add_argument('--img_width', type=int, default=128) # 32 倍數
     parser.add_argument('--img_nor_mean', type=float, nargs='+', default=(0.4914, 0.4822, 0.4465), help='mean in torchvision.transforms.Normalize')
     parser.add_argument('--img_nor_std', type=float, nargs='+', default=(0.2023, 0.1994, 0.2010), help='std in torchvision.transforms.Normalize')
 
@@ -51,11 +53,11 @@ def get_args():
     parser.add_argument('--in_channels', type=int, default=3, help='Set in_channels') 
 
     # 超參數
-    parser.add_argument('--batch_size', type=int, default=24,
+    parser.add_argument('--batch_size', type=int, default=6,
                         help='batch size')
     parser.add_argument('--val_batch_size', type=int, default=100,
                         help='val batch size')
-    parser.add_argument('--max_epoch', type=int, default=50,
+    parser.add_argument('--max_epoch', type=int, default=5, # 50
                         help='epoch to run')
     parser.add_argument('--patience', type=int, default=50,
                         help='patience for early stop')
@@ -79,13 +81,14 @@ def check_args(args):
     args.test_folder = os.path.join(args.data_folder, 'test')
     args.val_folder = os.path.join(args.data_folder, 'val')
 
-    args.model_file = os.path.join(args.data_folder, 
-        'model.pt' if args.use_Tracedmodule else 'model.pkl'
+    args.model_file = os.path.join(args.output_folder, 
+        'model.pt' if args.use_tracedmodule else 'model.pkl'
     )
 
     # 檢查
     for path in [args.train_folder, args.test_folder, args.val_folder]:
         assert os.path.exists(path), f'Data not found at {path}'
+
     assert len(args.num_blocks) == len(args.channels), '--num_blocks & --channels arguments must be of the same length'
 
     # 路徑
@@ -110,7 +113,7 @@ def log_system_info(args, log):
 
     cuda_divice = torch.cuda.get_device_name() if torch.cuda.is_available() else 'CPU'
     message += f'Train with the {args.device}({cuda_divice})\n'
-    log_string(log, '='*20 + '\n' + message + '='*20)
+    log_string(log, '='*20 + '\n[System Info]\n' + message + '='*20)
 
 def load_data(args, log):
     transform_train = transforms.Compose([
@@ -129,7 +132,8 @@ def load_data(args, log):
     val_folder = datasets.ImageFolder(args.val_folder, transform=transform_eval)
     test_folder = datasets.ImageFolder(args.test_folder, transform=transform_eval)
 
-    log_string(log, f'\nclass idx:\n{train_folder.class_to_idx}\n')
+    # log_string(log, f'\nclass idx:\n{train_folder.class_to_idx}\n')
+    saveJson(train_folder.class_to_idx, os.path.join(args.output_folder, 'class_idx.json'))
 
     train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=True)
     val_loader = torch.utils.data.DataLoader(val_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
@@ -137,19 +141,25 @@ def load_data(args, log):
 
     dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader}
 
-    log_string(log, f'images numbers: train({len(train_folder)}) | val({len(val_folder)}) |test({len(test_folder)})')
+    log_string(log, f'images numbers: train({len(train_folder)}) | val({len(val_folder)}) | test({len(test_folder)})')
 
     return dataloaders_dict
 
-def train_model(log, model, dataloaders_dict, criterion, optimizer, scheduler, num_epochs, patience):
+def train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler):
+    num_epochs, patience = args.max_epoch, args.patience
+    img_h, img_w = args.img_height, args.img_width
+
     best_acc = 0.0
     wait = 0
+    reuslt_ls = []
     for epoch in range(num_epochs):
         if wait >= patience:
             log_string(log, f'early stop at epoch: {epoch:04d}')
             break
-
+        
+        epoch_result_dt = {}
         for phase in ['train', 'val']:
+            start = time.time()
             if phase == 'train':
                 model.train()
             else:
@@ -176,31 +186,43 @@ def train_model(log, model, dataloaders_dict, criterion, optimizer, scheduler, n
 
             data_size = len(dataloader.dataset)
             epoch_loss = epoch_loss / data_size
-            epoch_acc = epoch_acc.double() / data_size
-            log_string(log, f'Epoch {epoch + 1}/{num_epochs} | {phase:^5} | Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.4f}')
+            epoch_acc = (epoch_acc.double() / data_size).tolist()
+            epoch_result_dt.update({phase:{'loss':epoch_loss, 'acc':epoch_acc, 'timeuse':time.time() - start}})
 
+        log_string(log, '\n{} | epoch: {}/{}, train loss: {:.4f}, val_loss: {:.4f} | training time: {:.1f}s, inference time: {:.1f}s'.format(
+                                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
+                                    epoch + 1,
+                                    args.max_epoch, 
+                                    epoch_result_dt['train']['loss'],
+                                    epoch_result_dt['val']['loss'],
+                                    epoch_result_dt['train']['timeuse'], 
+                                    epoch_result_dt['val']['timeuse']
+                                )
+                )
+
+        reuslt_ls.append(epoch_result_dt)
         scheduler.step()
 
         if epoch_acc > best_acc:
             best_model_wts = model.state_dict()
-            log_string(log, f'val loss decrease from {best_acc:.4f} to {epoch_acc:.4f}, saving model to {args.model_file}')
+            log_string(log, f'-> Val Accuracy improve from {best_acc:.4f} to {epoch_acc:.4f}, saving model to {args.model_file}')
 
             best_acc = epoch_acc
             wait = 0
         else:
             wait += 1
 
-    model.load_state_dict(best_model_wts)
-
     # 儲存模型
-    if args.use_Tracedmodule:
-        traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, 224, 224))
+    model.load_state_dict(best_model_wts)
+    if args.use_tracedmodule:
+        traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, img_h, img_w))
         traced.save(args.model_file)
     else:
         torch.save(model, args.model_file)
 
     log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
 
+    return reuslt_ls
 
 if __name__ == '__main__':
     # 參數
@@ -209,7 +231,7 @@ if __name__ == '__main__':
 
     # log
     log = open(os.path.join(args.output_folder, 'log.txt'), 'w')
-    log_string(log, f'{str(args)[10: -1]}\n')
+    log_string(log, '='*20 + '\n[arguments]\n' + f'{str(args)[10: -1]}\n' + '='*20)
     log_string(log, f'main output folder: {args.output_folder}')
     
     log_system_info(args, log)
@@ -217,7 +239,7 @@ if __name__ == '__main__':
     # load data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'loading data...')
     dataloaders_dict = load_data(args, log)
-    log_string(log, 'data loaded!\n')
+    log_string(log, 'data loaded!\n' + '='*20)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # build model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -234,18 +256,23 @@ if __name__ == '__main__':
     
     parameters = count_parameters(model)
     log_string(log, 'trainable parameters: {:,}'.format(parameters))
-    log_string(log, 'model loaded!\n')
+    log_string(log, 'model loaded!\n' + '='*20)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # train model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'training model...')
-    train_model(log, model, dataloaders_dict, criterion, optimizer, scheduler, args.max_epoch, args.patience)
-    log_string(log, 'training finish\n')
+    result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
+    saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
+
+    loss_train = [i['train']['loss'] for i in result_ls]
+    loss_val = [i['val']['loss'] for i in result_ls]
+
+    plot_train_val_loss(loss_train, loss_val, 
+                os.path.join(args.output_folder, 'train_val_loss.png'))
+    log_string(log, 'training finish!!!\n')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # test model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # plot_train_val_loss(loss_train, loss_val, 
-    #             os.path.join(fig_folder, 'train_val_loss.png'))
     # trainPred, valPred, testPred, eval_dt = test(args, log)
     # saveJson(eval_dt, os.path.join(output_folder, 'evaluation.json'))
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
