@@ -31,6 +31,7 @@ def get_args():
     # parameters
     parser.add_argument('--sample', type=bool, default=True)
     parser.add_argument('--sample_num_per_class', type=int, default=100)
+    parser.add_argument('--sample_file', type=str, default=None, help='使用已有的 sample(image_info.csv)，確保 sample 是一樣的')
 
     parser.add_argument('--crop_length', type=int, default=200)
 
@@ -127,32 +128,37 @@ def main():
 
 
     # 抽樣 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # 各類別數量上限
-    if args.sample:
-        coor_df = coor_df.groupby('label').sample(n=args.sample_num_per_class)
 
-    #  train、test、val
-    train = coor_df.groupby('label').sample(frac=args.train_ratio) # frac 用比例抽
-    tmp = coor_df.drop(train.index) # val & test
+    if args.sample_file:
+        coor_df = pd.read_csv(args.sample_file)
+    else:
+        # 各類別數量上限
+        if args.sample:
+            coor_df = coor_df.groupby('label').sample(n=args.sample_num_per_class)
 
-    new_val_rate = args.val_ratio/(args.test_ratio + args.val_ratio)
-    val = tmp.groupby('label').sample(frac=new_val_rate)
-    test = tmp.drop(val.index)
+        #  train、test、val
+        train = coor_df.groupby('label').sample(frac=args.train_ratio) # frac 用比例抽
+        tmp = coor_df.drop(train.index) # val & test
 
-    n = len(coor_df)
-    train_n, val_n, test_n = train.shape[0], val.shape[0], test.shape[0]
-    print(
-        'Train: {} ({:.2f}%)'.format(train_n, train_n/n),
-        '\nVal: {} ({:.2f}%)'.format(val_n, val_n/n),
-        '\nTest: {} ({:.2f}%)\n'.format(test_n, test_n/n)
-    )
+        new_val_rate = args.val_ratio/(args.test_ratio + args.val_ratio)
+        val = tmp.groupby('label').sample(frac=new_val_rate)
+        test = tmp.drop(val.index)
 
-    coor_df.loc[train.index, 'split'] = 'train'
-    coor_df.loc[val.index, 'split'] = 'val'
-    coor_df.loc[test.index, 'split'] = 'test'
-    del train; del val; del test
+        n = len(coor_df)
+        train_n, val_n, test_n = train.shape[0], val.shape[0], test.shape[0]
+        print(
+            'Train: {} ({:.2f}%)'.format(train_n, train_n/n),
+            '\nVal: {} ({:.2f}%)'.format(val_n, val_n/n),
+            '\nTest: {} ({:.2f}%)\n'.format(test_n, test_n/n)
+        )
 
-    coor_df.sort_values('TARGET_FID', inplace=True)
+        coor_df.loc[train.index, 'split'] = 'train'
+        coor_df.loc[val.index, 'split'] = 'val'
+        coor_df.loc[test.index, 'split'] = 'test'
+        del train; del val; del test
+
+        coor_df.sort_values('TARGET_FID', inplace=True)
+    
     coor_df.to_csv(os.path.join(args.output_folder, 'image_info.csv'), index=False)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
