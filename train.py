@@ -10,6 +10,12 @@ Author: 林政委
 GitHub: https://github.com/VincLee8188/GMAN-PyTorch
 
 Describe: train pipeline
+
+ISSUe:
+    1. pin_memory under torch.utils.data.DataLoader' 使用問題
+        -> 在我的電腦上使用 GPU 測，記憶體用量差不多，但是 False 的時候速度比較快
+    2. coatnet 模型本身限制
+        -> img_height、img_width 必須是 32 倍數。(預測 5 層就要可以整除 2^5 次。)
 """
 import os
 import time
@@ -69,6 +75,8 @@ def get_args():
     # 其他
     parser.add_argument('--device', default='gpu', 
                         help='cpu or cuda')
+    parser.add_argument('--pin_memory_train', type=str2bool, default=False, 
+                        help='argument under torch.utils.data.DataLoader')
 
     args = parser.parse_args()
 
@@ -82,7 +90,7 @@ def check_args(args):
     args.val_folder = os.path.join(args.data_folder, 'val')
 
     args.model_file = os.path.join(args.output_folder, 
-        'model.pt' if args.use_tracedmodule else 'model.pkl'
+        'model.pth' if args.use_tracedmodule else 'model.pkl'
     )
 
     # 檢查
@@ -115,7 +123,7 @@ def log_system_info(args, log):
     message += f'Train with the {args.device}({cuda_divice})\n'
     log_string(log, '='*20 + '\n[System Info]\n' + message + '='*20)
 
-def load_data(args, log):
+def load_data(args, log, is_eval=False):
     transform_train = transforms.Compose([
         transforms.RandomRotation(90),
         transforms.Resize((args.img_height, args.img_width)),
@@ -134,8 +142,12 @@ def load_data(args, log):
 
     # log_string(log, f'\nclass idx:\n{train_folder.class_to_idx}\n')
     saveJson(train_folder.class_to_idx, os.path.join(args.output_folder, 'class_idx.json'))
+    
+    if is_eval:
+        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0, pin_memory=args.pin_memory_train)
+    else:
+        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=args.pin_memory_train)
 
-    train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=True)
     val_loader = torch.utils.data.DataLoader(val_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
     test_loader = torch.utils.data.DataLoader(test_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
 
@@ -223,6 +235,9 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
     log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
 
     return reuslt_ls
+
+# def test_model():
+
 
 if __name__ == '__main__':
     # 參數
