@@ -55,7 +55,7 @@ def get_args():
     parser.add_argument('--img_nor_std', type=float, nargs='+', default=(0.2023, 0.1994, 0.2010), help='std in torchvision.transforms.Normalize')
 
     # coatnet 參數
-    parser.add_argument('--num_blocks', type=int, nargs='+', default=[2, 2, 12, 28, 2], help='Set num_blocks') # python arg.py -l 1234 2345 3456 4567
+    parser.add_argument('--num_blocks', type=int, nargs='+', default=[2, 2, 12, 28, 2], help='Set num_blocks') # python arg.py -l 2 2 12 28 2
     parser.add_argument('--channels', type=int, nargs='+', default=[64, 64, 128, 256, 512], help='Set channels') 
     parser.add_argument('--in_channels', type=int, default=3, help='Set in_channels') 
 
@@ -111,6 +111,7 @@ def check_args(args):
 
     return args
 
+
 def log_system_info(args, log):
     message = f"Computer network name: {platform.node()}\n"+ \
                 f"Machine type: {platform.machine()}\n" + \
@@ -123,6 +124,7 @@ def log_system_info(args, log):
     cuda_divice = torch.cuda.get_device_name() if torch.cuda.is_available() else 'CPU'
     message += f'Train with the {args.device}({cuda_divice})\n'
     log_string(log, '='*20 + '\n[System Info]\n' + message + '='*20)
+
 
 def load_data(args, log, is_eval=False):
     transform_train = transforms.Compose([
@@ -157,6 +159,15 @@ def load_data(args, log, is_eval=False):
     log_string(log, f'images numbers: train({len(train_folder)}) | val({len(val_folder)}) | test({len(test_folder)})')
 
     return dataloaders_dict
+
+
+def save_model(args, model):
+    if args.use_tracedmodule:
+        traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, args.img_height, args.img_width))
+        traced.save(args.model_file)
+    else:
+        torch.save(model, args.model_file)
+
 
 def train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler):
     num_epochs, patience = args.max_epoch, args.patience
@@ -236,12 +247,6 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
 
     return reuslt_ls
 
-def save_model(args, model):
-    if args.use_tracedmodule:
-        traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, args.img_height, args.img_width))
-        traced.save(args.model_file)
-    else:
-        torch.save(model, args.model_file)
 
 def test_model(args, log, model, dataloaders_dict, criterion):
     num_epochs = args.max_epoch
