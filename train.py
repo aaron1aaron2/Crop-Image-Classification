@@ -15,7 +15,7 @@ ISSUe:
     1. pin_memory under torch.utils.data.DataLoader' 使用問題
         -> 在我的電腦上使用 GPU 測，記憶體用量差不多，但是 False 的時候速度比較快
     2. coatnet 模型本身限制
-        -> img_height、img_width 必須是 32 倍數。(預測 5 層就要可以整除 2^5 次。)
+        -> img_height、img_width 必須是 32 倍數。(預測 5 層就要需要整除 2^5 次的長寬。)
 """
 import os
 import time
@@ -46,6 +46,7 @@ def get_args():
     # 輸出
     parser.add_argument('--output_folder', type=str, default='output/test_sample')
     parser.add_argument('--use_tracedmodule', type=str2bool, default=True)
+    parser.add_argument('--auto_save_model', type=str2bool, default=False, help='save model when improve')
 
     # 前處理
     parser.add_argument('--img_height', type=int, default=128) # 32 倍數
@@ -159,7 +160,6 @@ def load_data(args, log, is_eval=False):
 
 def train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler):
     num_epochs, patience = args.max_epoch, args.patience
-    img_h, img_w = args.img_height, args.img_width
 
     best_acc = 0.0
     wait = 0
@@ -217,7 +217,10 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
 
         if epoch_acc > best_acc:
             best_model_wts = model.state_dict()
-            log_string(log, f'-> Val Accuracy improve from {best_acc:.4f} to {epoch_acc:.4f}, saving model to {args.model_file}')
+            log_string(log, f'-> Val Accuracy improve from {best_acc:.4f} to {epoch_acc:.4f}, saving model')
+
+            if args.auto_save_model:
+                save_model(args, model)
 
             best_acc = epoch_acc
             wait = 0
@@ -226,17 +229,49 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
 
     # 儲存模型
     model.load_state_dict(best_model_wts)
-    if args.use_tracedmodule:
-        traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, img_h, img_w))
-        traced.save(args.model_file)
-    else:
-        torch.save(model, args.model_file)
+    save_model(args, model)
+
 
     log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
 
     return reuslt_ls
 
-# def test_model():
+def save_model(args, model):
+    if args.use_tracedmodule:
+        traced = torch.jit.trace(model.cpu(), torch.rand(1, 3, args.img_height, args.img_width))
+        traced.save(args.model_file)
+    else:
+        torch.save(model, args.model_file)
+
+def test_model(args, log, model, dataloaders_dict, criterion):
+    num_epochs = args.max_epoch
+    img_h, img_w = args.img_height, args.img_width
+
+    reuslt_ls = []
+    with torch.no_grad():
+        for phase in ['train', 'val', 'test']:
+            start = time.time()
+
+            epoch_loss = 0.0
+            epoch_acc = 0
+
+            dataloader = dataloaders_dict[phase]
+            for item in tqdm(dataloader, leave=False):
+                images = item[0].to(args.device).float()
+                classes = item[1].to(args.device).long()
+
+                output = model(images)
+                loss = criterion(output, classes)
+                _, preds = torch.max(output, 1)
+
+                epoch_loss += loss.item() * len(output)
+                epoch_acc += torch.sum(preds == classes.data)
+
+            data_size = len(dataloader.dataset)
+            epoch_loss = epoch_loss / data_size
+            epoch_acc = (epoch_acc.double() / data_size).tolist()
+        
+        evaluation_dt = {phase:{'loss':epoch_loss, 'acc':epoch_acc, 'timeuse':time.time() - start}}
 
 
 if __name__ == '__main__':
