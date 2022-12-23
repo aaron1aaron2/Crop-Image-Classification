@@ -292,13 +292,13 @@ if __name__ == '__main__':
     log_system_info(args, log)
 
     # load data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    log_string(log, 'loading data...')
+    log_string(log, '>> loading data...')
     dataloaders_dict = load_data(args, log)
-    log_string(log, 'data loaded!\n' + '='*20)
+    log_string(log, '>> data loaded!\n' + '='*20)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # build model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    log_string(log, 'compiling model...')
+    log_string(log, '>> compiling model...')
     
     model = CoAtNet((args.img_height, args.img_width), args.in_channels, args.num_blocks, args.channels, num_classes=33)
     model = model.to(args.device)
@@ -311,11 +311,11 @@ if __name__ == '__main__':
     
     parameters = count_parameters(model)
     log_string(log, 'trainable parameters: {:,}'.format(parameters))
-    log_string(log, 'model loaded!\n' + '='*20)
+    log_string(log, '>> model loaded!\n' + '='*20)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # train model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    log_string(log, 'training model...')
+    log_string(log, '>> training model...')
     result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
     saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
 
@@ -324,10 +324,12 @@ if __name__ == '__main__':
 
     plot_train_val_loss(loss_train, loss_val, 
                 os.path.join(args.output_folder, 'train_val_loss.png'))
-    log_string(log, 'training finish!!!\n')
+    log_string(log, '>> training finish\n')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # test model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    log_string(log, '>> calculating evaluation...')
     # trainPred, valPred, testPred, eval_dt = test(args, log)
     # saveJson(eval_dt, os.path.join(output_folder, 'evaluation.json'))
+    log_string(log, '>> finished!!!\n')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
