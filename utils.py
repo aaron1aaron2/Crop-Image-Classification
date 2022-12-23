@@ -10,6 +10,8 @@ import time
 import argparse
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter
+from matplotlib.pyplot import MultipleLocator
 
 from pathlib import Path
 from functools import wraps
@@ -51,9 +53,17 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def plot_train_val_loss(train_total_loss, val_total_loss, file_path):
+    plt.clf()
     plt.figure(figsize=(10, 5))
+
     plt.plot(range(1, len(train_total_loss) + 1), train_total_loss, c='b', marker='s', label='Train')
     plt.plot(range(1, len(val_total_loss) + 1), val_total_loss, c='r', marker='o', label='Validation')
     plt.legend(loc='best')
     plt.title('Train loss vs Validation loss')
+
+    # gca() 獲取當前的 axis
+    plt.gca().xaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))  # 不要小數點
+    plt.gca().xaxis.set_major_locator(MultipleLocator(1)) # 間隔1
+
+
     plt.savefig(file_path)
