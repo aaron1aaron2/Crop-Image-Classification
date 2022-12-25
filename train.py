@@ -126,7 +126,7 @@ def log_system_info(args, log):
     log_string(log, '='*20 + '\n[System Info]\n' + message + '='*20)
 
 
-def load_data(args, log, is_eval=False):
+def load_data(args, log):
     transform_train = transforms.Compose([
         transforms.RandomRotation(90),
         transforms.Resize((args.img_height, args.img_width)),
@@ -146,15 +146,13 @@ def load_data(args, log, is_eval=False):
     # log_string(log, f'\nclass idx:\n{train_folder.class_to_idx}\n')
     saveJson(train_folder.class_to_idx, os.path.join(args.output_folder, 'class_idx.json'))
     
-    if is_eval:
-        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0, pin_memory=args.pin_memory_train)
-    else:
-        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=args.pin_memory_train)
+    train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=args.pin_memory_train)
+    train_eval_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0, pin_memory=args.pin_memory_train)
 
     val_loader = torch.utils.data.DataLoader(val_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
     test_loader = torch.utils.data.DataLoader(test_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
 
-    dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader}
+    dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader, "train_eval": train_eval_loader}
 
     log_string(log, f'images numbers: train({len(train_folder)}) | val({len(val_folder)}) | test({len(test_folder)})')
 
@@ -249,9 +247,7 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
 
 
 def test_model(args, log, model, dataloaders_dict, criterion):
-    num_epochs = args.max_epoch
     img_h, img_w = args.img_height, args.img_width
-
     reuslt_ls = []
     with torch.no_grad():
         for phase in ['train', 'val', 'test']:
@@ -260,7 +256,7 @@ def test_model(args, log, model, dataloaders_dict, criterion):
             epoch_loss = 0.0
             epoch_acc = 0
 
-            dataloader = dataloaders_dict[phase]
+            dataloader = dataloaders_dict[phase] if phase != 'train' else dataloaders_dict['train_eval']
             for item in tqdm(dataloader, leave=False):
                 images = item[0].to(args.device).float()
                 classes = item[1].to(args.device).long()
@@ -268,7 +264,8 @@ def test_model(args, log, model, dataloaders_dict, criterion):
                 output = model(images)
                 loss = criterion(output, classes)
                 _, preds = torch.max(output, 1)
-
+                from IPython import embed
+                embed();exit()
                 epoch_loss += loss.item() * len(output)
                 epoch_acc += torch.sum(preds == classes.data)
 
