@@ -11,11 +11,11 @@ GitHub: https://github.com/VincLee8188/GMAN-PyTorch
 
 Describe: train pipeline
 
-ISSUe:
-    1. pin_memory under torch.utils.data.DataLoader' 使用問題
-        -> 在我的電腦上使用 GPU 測，記憶體用量差不多，但是 False 的時候速度比較快
-    2. coatnet 模型本身限制
-        -> img_height、img_width 必須是 32 倍數。(預測 5 層就要需要整除 2^5 次的長寬。)
+[ISSUE]
+1. pin_memory under torch.utils.data.DataLoader' 使用問題
+    -> 在我的電腦上使用 GPU 測，記憶體用量差不多，但是 False 的時候速度比較快
+2. coatnet 模型本身限制
+    -> img_height、img_width 必須是 32 倍數。(預測 5 層就要需要整除 2^5 次的長寬。)
 """
 import os
 import time
@@ -55,7 +55,7 @@ def get_args():
     parser.add_argument('--img_nor_std', type=float, nargs='+', default=(0.2023, 0.1994, 0.2010), help='std in torchvision.transforms.Normalize')
 
     # coatnet 參數
-    parser.add_argument('--num_blocks', type=int, nargs='+', default=[2, 2, 12, 28, 2], help='Set num_blocks') # python arg.py -l 2 2 12 28 2
+    parser.add_argument('--num_blocks', type=int, nargs='+', default=[2, 2, 12, 28, 2], help='Set num_blocks')  # python arg.py -l 2 2 12 28 2
     parser.add_argument('--channels', type=int, nargs='+', default=[64, 64, 128, 256, 512], help='Set channels') 
     parser.add_argument('--in_channels', type=int, default=3, help='Set in_channels') 
 
