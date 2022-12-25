@@ -173,10 +173,12 @@ class Transformer(nn.Module):
 
 class CoAtNet(nn.Module):
     def __init__(self, image_size, in_channels, num_blocks, channels, num_classes=1000,
-                 block_types=['C', 'C', 'T', 'T']):
+                 block_types=['C', 'C', 'T', 'T'], prob=True):
         super().__init__()
         ih, iw = image_size
         block = {'C': MBConv, 'T': Transformer}
+
+        self.prob = prob
 
         self.s0 = self._make_layer(
             conv_3x3_bn, in_channels, channels[0], num_blocks[0], (ih // 2, iw // 2))
@@ -192,6 +194,8 @@ class CoAtNet(nn.Module):
         self.pool = nn.AvgPool2d(ih // 32, 1)
         self.fc = nn.Linear(channels[-1], num_classes, bias=False)
 
+        self.sf = nn.Softmax() 
+
     def forward(self, x):
         x = self.s0(x) # [5, 64, 112, 112]
         x = self.s1(x) # [5, 64, 56, 56]
@@ -201,6 +205,14 @@ class CoAtNet(nn.Module):
 
         x = self.pool(x).view(-1, x.shape[1])
         x = self.fc(x)
+
+        if self.prob:
+            x_min = x.min(1).values.abs()
+            x = x + x_min.unsqueeze(1)
+            x = x/x.max(1).values.unsqueeze(1)
+
+            x = self.sf(x)
+
         return x
 
     def _make_layer(self, block, inp, oup, depth, image_size):
@@ -211,3 +223,12 @@ class CoAtNet(nn.Module):
             else:
                 layers.append(block(oup, oup, image_size))
         return nn.Sequential(*layers)
+
+class Custom(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.to_prob = self.to_probability()
+
+    def forward(self, x):
+
+        t =torch.min(output, 1).values
