@@ -3,5 +3,7 @@ numpy
 psutil
 einops
 pandas
+pretty-confusion-matrix
 matplotlib
 opencv-python
+scikit-learn
