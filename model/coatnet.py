@@ -223,12 +223,3 @@ class CoAtNet(nn.Module):
             else:
                 layers.append(block(oup, oup, image_size))
         return nn.Sequential(*layers)
-
-class Custom(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.to_prob = self.to_probability()
-
-    def forward(self, x):
-
-        t =torch.min(output, 1).values
