@@ -1,6 +1,6 @@
 python train.py ^
     --data_folder data/sample10_L96(test) ^
-    --output_folder output/sample(test)_ ^
+    --output_folder output/sample(test) ^
     --img_height 96 ^
     --img_width 96 ^
     --batch_size 6 ^
@@ -9,4 +9,5 @@ python train.py ^
     --learning_rate 0.01 ^
     --decay_epoch 2 ^
     --device gpu ^
-    --pin_memory_train True
+    --pin_memory_train True ^
+    --prob False
