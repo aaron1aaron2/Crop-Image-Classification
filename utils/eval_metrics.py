@@ -5,7 +5,9 @@ Create Date: 2022.12.19
 Last Update: 2022.12.25
 """
 import functools
+import numpy as np
 import pandas as pd
+
 from sklearn import metrics
 import matplotlib.pyplot as plt
 
@@ -37,5 +39,5 @@ def plot_confusion_matrix(confusion_matrix, file_path, class_ls):
 
     plt.savefig(file_path)
 
-def Weighted_Precision():
+def Weighted_Precision(pred, target):
     metrics.confusion_matrix
