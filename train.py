@@ -34,6 +34,7 @@ from tqdm import tqdm
 from torchvision import datasets, transforms
 
 from utils.utils import *
+from utils.eval_metrics import prob_metrics_dt, metrics_dt, plot_confusion_matrix
 from model.coatnet import CoAtNet
 
 
@@ -127,7 +128,7 @@ def log_system_info(args, log):
     log_string(log, '\n[System Info]\n' + message + '='*20)
 
 
-def load_data(args, log):
+def load_data(args, log, eval_stage=False):
     transform_train = transforms.Compose([
         transforms.RandomRotation(90),
         transforms.Resize((args.img_height, args.img_width)),
@@ -147,13 +148,15 @@ def load_data(args, log):
     # log_string(log, f'\nclass idx:\n{train_folder.class_to_idx}\n')
     saveJson(train_folder.class_to_idx, os.path.join(args.output_folder, 'class_idx.json'))
     
-    train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=args.pin_memory_train)
-    train_eval_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0, pin_memory=args.pin_memory_train)
+    if eval_stage:
+        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0, pin_memory=args.pin_memory_train)
+    else:
+        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=args.pin_memory_train)
 
     val_loader = torch.utils.data.DataLoader(val_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
     test_loader = torch.utils.data.DataLoader(test_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0)
 
-    dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader, "train_eval": train_eval_loader}
+    dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader}
 
     log_string(log, f'images numbers: train({len(train_folder)}) | val({len(val_folder)}) | test({len(test_folder)})')
 
@@ -261,7 +264,7 @@ def test_model(args, log, dataloaders_dict, criterion):
             epoch_acc = 0
             Pred_list = []
 
-            dataloader = dataloaders_dict[phase] if phase != 'train' else dataloaders_dict['train_eval']
+            dataloader = dataloaders_dict[phase]
             for item in tqdm(dataloader, leave=False):
                 images = item[0].to(args.device).float()
                 classes = item[1].to(args.device).long()
@@ -273,6 +276,8 @@ def test_model(args, log, dataloaders_dict, criterion):
                 embed();exit()
                 epoch_loss += loss.item() * len(output)
                 epoch_acc += torch.sum(preds == classes.data)
+
+                Pred_list.exend(preds)
 
             data_size = len(dataloader.dataset)
             epoch_loss = epoch_loss / data_size
@@ -287,7 +292,7 @@ if __name__ == '__main__':
 
     # log
     log = open(os.path.join(args.output_folder, 'log.txt'), 'w')
-    log_string(log, '='*20 + '\n[arguments]\n' + f'{str(args)[10: -1]}\n')
+    log_string(log, '='*20 + '\n[arguments]\n' + f'{str(args)[10: -1]}')
     log_system_info(args, log)
 
     # load data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -323,20 +328,21 @@ if __name__ == '__main__':
 
     # train model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'training model...')
-    # result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
-    # saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
+    result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
+    saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
 
-    # plot_train_val_loss(
-    #     train_total_loss=[i['train']['loss'] for i in result_ls], 
-    #     val_total_loss=[i['val']['loss'] for i in result_ls],
-    #     file_path=os.path.join(args.output_folder, 'train_val_loss.png')
-    #     )
+    plot_train_val_loss(
+        train_total_loss=[i['train']['loss'] for i in result_ls], 
+        val_total_loss=[i['val']['loss'] for i in result_ls],
+        file_path=os.path.join(args.output_folder, 'train_val_loss.png')
+        )
 
     log_string(log, 'training finish\n')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # test model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'calculating evaluation...')
+    dataloaders_dict = load_data(args, log, eval_stage=True)
     eval_dt = test_model(args, log, dataloaders_dict, criterion)
     saveJson(eval_dt, os.path.join(args.output_folder, 'evaluation.json'))
     log_string(log, 'finished!!!\n')
