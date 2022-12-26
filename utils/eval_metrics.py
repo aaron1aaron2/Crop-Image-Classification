@@ -32,7 +32,6 @@ metrics_dt = {
     'confusion_matrix': metrics.confusion_matrix
 }
 
-
 def plot_confusion_matrix(confusion_matrix, file_path, class_ls):
     df_cm = pd.DataFrame(confusion_matrix, index=class_ls, columns=class_ls)
     pp_matrix(df_cm, cmap='PuRd')
@@ -40,4 +39,10 @@ def plot_confusion_matrix(confusion_matrix, file_path, class_ls):
     plt.savefig(file_path)
 
 def Weighted_Precision(pred, target):
-    metrics.confusion_matrix
+    from IPython import embed
+    embed() ; exit()
+
+def get_evaluation(pred, label, pred_prob):
+    result_dt = {Weighted_Precision(pred, label)}
+    pass
+
