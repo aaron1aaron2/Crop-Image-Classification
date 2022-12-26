@@ -16,6 +16,8 @@ Describe: train pipeline
     -> 在我的電腦上使用 GPU 測，記憶體用量差不多，但是 False 的時候速度比較快
 2. coatnet 模型本身限制
     -> img_height、img_width 必須是 32 倍數。(預測 5 層就要需要整除 2^5 次的長寬。)
+3. 追蹤 dataloader 後對應的 image path
+    -> 自定義 datasets.ImageFolder 的 __getitem__ 方法。(https://gist.github.com/andrewjong/6b02ff237533b3b2c554701fb53d5c4d)
 """
 import os
 import time
@@ -25,6 +27,7 @@ import argparse
 import datetime
 import warnings
 warnings.filterwarnings("ignore")
+import pandas as pd
 
 import torch
 import torch.nn as nn
@@ -34,7 +37,7 @@ from tqdm import tqdm
 from torchvision import datasets, transforms
 
 from utils.utils import *
-from utils.eval_metrics import prob_metrics_dt, metrics_dt, plot_confusion_matrix
+from utils.eval_metrics import get_evaluation, plot_confusion_matrix
 from model.coatnet import CoAtNet
 
 
@@ -84,6 +87,22 @@ def get_args():
     args = parser.parse_args()
 
     return args
+
+
+class ImageFolderWithPaths(datasets.ImageFolder):
+    """Custom dataset that includes image file paths. Extends
+    torchvision.datasets.ImageFolder
+    """
+
+    # override the __getitem__ method. this is the method that dataloader calls
+    def __getitem__(self, index):
+        # this is what ImageFolder normally returns 
+        original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
+        # the image file path
+        path = self.imgs[index][0]
+        # make a new tuple that includes original and the path
+        tuple_with_path = (original_tuple + (path,))
+        return tuple_with_path
 
 def check_args(args):
     # 新增參數
@@ -255,14 +274,22 @@ def test_model(args, log, dataloaders_dict, criterion):
     model.eval()
     model = model.to(args.device)
 
-    reuslt_ls = []
+    class_idx_dt = json.load(open(os.path.join(args.output_folder, 'class_idx.json'), 'r'))
+    idx_class_dt = {v:k for k,v in class_idx_dt.items()}
+
+    evaluation_dt = {}
+    df_pred = pd.DataFrame()
+    df_model_out = pd.DataFrame()
     with torch.no_grad():
         for phase in ['train', 'val', 'test']:
             start = time.time()
 
             epoch_loss = 0.0
             epoch_acc = 0
+
+            Output_list = []
             Pred_list = []
+            Label_list = []
 
             dataloader = dataloaders_dict[phase]
             for item in tqdm(dataloader, leave=False):
@@ -272,18 +299,33 @@ def test_model(args, log, dataloaders_dict, criterion):
                 output = model(images)
                 loss = criterion(output, classes)
                 _, preds = torch.max(output, 1)
-                from IPython import embed
-                embed();exit()
+
                 epoch_loss += loss.item() * len(output)
                 epoch_acc += torch.sum(preds == classes.data)
 
-                Pred_list.exend(preds)
+                Pred_list.extend(preds.tolist())
+                Label_list.extend(classes.tolist())
+                Output_list.extend(output.tolist())
 
             data_size = len(dataloader.dataset)
             epoch_loss = epoch_loss / data_size
             epoch_acc = (epoch_acc.double() / data_size).tolist()
-        
-            evaluation_dt = {phase:{'loss':epoch_loss, 'acc':epoch_acc, 'timeuse':time.time() - start}}
+
+            df_pred = df_pred.append(pd.DataFrame(
+                {'Label_idx':Label_list, 'Predict_idx': Pred_list, 'Phase': [phase]*len(Pred_list)}
+            ))
+            df_model_out = df_model_out.append(pd.DataFrame(output.cpu(), columns=class_idx_dt.keys()))
+            
+            phase_eval_dt = {'loss':epoch_loss, 'acc':epoch_acc, 'timeuse':time.time() - start} 
+            phase_eval_dt.update(get_evaluation(Pred_list, Label_list, Output_list))
+            evaluation_dt.update({phase:phase_eval_dt})
+
+        df_pred['Label'] = df_pred['Label_idx'].apply(lambda x: idx_class_dt[x])
+        df_pred['Predict'] = df_pred['Predict_idx'].apply(lambda x: idx_class_dt[x])
+
+        df_pred.to_csv(os.path.join(args.output_folder, 'pred_and_label.csv'), index=False)
+        df_model_out.to_csv(os.path.join(args.output_folder, 'model_output.csv'), index=False)
+        saveJson(evaluation_dt, os.path.join(args.output_folder, 'evaluation.json'))
 
 if __name__ == '__main__':
     # 參數
@@ -328,14 +370,14 @@ if __name__ == '__main__':
 
     # train model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'training model...')
-    result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
-    saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
+    # result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
+    # saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
 
-    plot_train_val_loss(
-        train_total_loss=[i['train']['loss'] for i in result_ls], 
-        val_total_loss=[i['val']['loss'] for i in result_ls],
-        file_path=os.path.join(args.output_folder, 'train_val_loss.png')
-        )
+    # plot_train_val_loss(
+    #     train_total_loss=[i['train']['loss'] for i in result_ls], 
+    #     val_total_loss=[i['val']['loss'] for i in result_ls],
+    #     file_path=os.path.join(args.output_folder, 'train_val_loss.png')
+    #     )
 
     log_string(log, 'training finish\n')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -343,7 +385,6 @@ if __name__ == '__main__':
     # test model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'calculating evaluation...')
     dataloaders_dict = load_data(args, log, eval_stage=True)
-    eval_dt = test_model(args, log, dataloaders_dict, criterion)
-    saveJson(eval_dt, os.path.join(args.output_folder, 'evaluation.json'))
+    test_model(args, log, dataloaders_dict, criterion)
     log_string(log, 'finished!!!\n')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
