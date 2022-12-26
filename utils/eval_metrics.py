@@ -20,6 +20,31 @@ import matplotlib.pyplot as plt
 
 from pretty_confusion_matrix import pp_matrix
 
+def plot_confusion_matrix(confusion_matrix, file_path, class_ls):
+    df_cm = pd.DataFrame(confusion_matrix, index=class_ls, columns=class_ls)
+    pp_matrix(df_cm, cmap='PuRd')
+
+    plt.savefig(file_path)
+
+
+def get_evaluation(pred, label, pred_prob):
+    result_dt = {k:v(pred, label) for k, v in metrics_dt.items()}
+    result_dt.update({k:v(pred_prob, label) for k, v in prob_metrics_dt.items()})
+    
+    return result_dt
+
+# y_true, y_pred -> [0, 1, 1, 0], [0, 1, 1, 1]
+metrics_dt = {
+    'Weighted_Precision': functools.partial(metrics.precision_score, average='weighted'),
+    'Balanced_acc': metrics.balanced_accuracy_score,
+    'f1_micro': functools.partial(metrics.f1_score, average='micro'),
+    'f1_macro': functools.partial(metrics.f1_score, average='macro'),
+    'f1_weighted': functools.partial(metrics.f1_score, average='weighted'),
+    'report': functools.partial(metrics.classification_report, output_dict=True),
+    'confusion_matrix': metrics.confusion_matrix
+}
+
+
 # y_true, y_score -> [0, 1, 2], [[0.5, 0.2, 0.2], [0.3, 0.4, 0.2], [0.2, 0.4, 0.3]]
 prob_metrics_dt = {
     'Top_3_acc': functools.partial(metrics.top_k_accuracy_score, k=3),
@@ -28,31 +53,3 @@ prob_metrics_dt = {
     'roc_auc_score(ovr)': functools.partial(metrics.roc_auc_score, multi_class='ovr'),
     'roc_auc_score(ovo)': functools.partial(metrics.roc_auc_score, multi_class='ovo')
 }
-
-# y_true, y_pred -> [0, 1, 1, 0], [0, 1, 1, 1]
-metrics_dt = {
-    'Balanced_acc': metrics.balanced_accuracy_score,
-    'f1_micro': functools.partial(metrics.f1_score, average='micro'),
-    'f1_macro': functools.partial(metrics.f1_score, average='macro'),
-    'f1_weighted': functools.partial(metrics.f1_score, average='weighted'),
-    # 'report': functools.partial(metrics.classification_report, output_dict=True),
-    # 'confusion_matrix': metrics.confusion_matrix
-}
-
-def plot_confusion_matrix(confusion_matrix, file_path, class_ls):
-    df_cm = pd.DataFrame(confusion_matrix, index=class_ls, columns=class_ls)
-    pp_matrix(df_cm, cmap='PuRd')
-
-    plt.savefig(file_path)
-
-def Weighted_Precision(pred, label):
-    metrics.recall_score()
-    metrics.precision_score()
-    from IPython import embed
-    embed() ; exit()
-
-def get_evaluation(pred, label, pred_prob):
-    result_dt = {Weighted_Precision(pred, label)}
-    
-    return report, result_dt
-
