@@ -1,0 +1,24 @@
+====================
+[arguments]
+data_folder='data/sample10_L96(test)', output_folder='output/test_sample', use_tracedmodule=True, auto_save_model=True, img_height=96, img_width=96, img_nor_mean=(0.4914, 0.4822, 0.4465), img_nor_std=(0.2023, 0.1994, 0.201), num_blocks=[2, 2, 12, 28, 2], channels=[64, 64, 128, 256, 512], in_channels=3, train_prob=False, prob=True, batch_size=6, val_batch_size=100, max_epoch=5, patience=50, learning_rate=0.001, decay_epoch=10, device='cuda', pin_memory_train=False, train_folder='data/sample10_L96(test)\\train', test_folder='data/sample10_L96(test)\\test', val_folder='data/sample10_L96(test)\\val', model_file='output/test_sample\\model.pth', fig_folder='output/test_sample\\figure'
+
+[System Info]
+Computer network name: MSI
+Machine type: AMD64
+Processor type: Intel64 Family 6 Model 166 Stepping 0, GenuineIntel
+Platform type: Windows-10-10.0.22621-SP0
+Number of physical cores: 6
+Number of logical cores: 12
+Max CPU frequency: 1608.0
+Train with the cuda(NVIDIA GeForce GTX 1650 with Max-Q Design)
+====================
+loading data...
+images numbers: train(231) | val(33) | test(66)
+data loaded!
+====================
+compiling model...
+trainable parameters: 28,027,568
+model loaded!
+====================
+calculating evaluation...
+images numbers: train(231) | val(33) | test(66)
