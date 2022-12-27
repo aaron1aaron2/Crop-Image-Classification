@@ -61,7 +61,8 @@ def get_args():
     # coatnet 參數
     parser.add_argument('--num_blocks', type=int, nargs='+', default=[2, 2, 12, 28, 2], help='Set num_blocks')  # python arg.py -l 2 2 12 28 2
     parser.add_argument('--channels', type=int, nargs='+', default=[64, 64, 128, 256, 512], help='Set channels') 
-    parser.add_argument('--in_channels', type=int, default=3, help='Set in_channels') 
+    parser.add_argument('--in_channels', type=int, default=3, help='Set in_channels')
+    parser.add_argument('--train_prob', type=str2bool, default=False, help='The output of the last layer is converted into a probability')  # python arg.py -l 2 2 12 28 2
     parser.add_argument('--prob', type=str2bool, default=True, help='The output of the last layer is converted into a probability')  # python arg.py -l 2 2 12 28 2
 
     # 超參數
@@ -317,6 +318,8 @@ def test_model(args, log, dataloaders_dict, criterion):
             ))
             df_model_out = df_model_out.append(pd.DataFrame(output.cpu(), columns=class_idx_dt.keys()))
             
+            Output_list = list(map(to_prob, Output_list)) if args.prob else None
+
             phase_eval_dt = {'loss':epoch_loss, 'acc':epoch_acc, 'timeuse':time.time() - start} 
             phase_eval_dt.update(get_evaluation(Pred_list, Label_list, Output_list))
             evaluation_dt.update({phase:phase_eval_dt})
@@ -353,7 +356,7 @@ if __name__ == '__main__':
                 num_blocks=args.num_blocks, 
                 channels=args.channels, 
                 num_classes=33,
-                prob=args.prob
+                prob=args.train_prob
                 )
 
     model = model.to(args.device)
@@ -371,14 +374,14 @@ if __name__ == '__main__':
 
     # train model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     log_string(log, 'training model...')
-    # result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
-    # saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
+    result_ls = train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler)
+    saveJson(result_ls, os.path.join(args.output_folder, 'epoch_result.json'))
 
-    # plot_train_val_loss(
-    #     train_total_loss=[i['train']['loss'] for i in result_ls], 
-    #     val_total_loss=[i['val']['loss'] for i in result_ls],
-    #     file_path=os.path.join(args.output_folder, 'train_val_loss.png')
-    #     )
+    plot_train_val_loss(
+        train_total_loss=[i['train']['loss'] for i in result_ls], 
+        val_total_loss=[i['val']['loss'] for i in result_ls],
+        file_path=os.path.join(args.output_folder, 'train_val_loss.png')
+        )
 
     log_string(log, 'training finish\n')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
