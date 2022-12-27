@@ -50,7 +50,7 @@ def get_args():
     # 輸出
     parser.add_argument('--output_folder', type=str, default='output/test_sample')
     parser.add_argument('--use_tracedmodule', type=str2bool, default=True)
-    parser.add_argument('--auto_save_model', type=str2bool, default=False, help='save model when improve')
+    parser.add_argument('--auto_save_model', type=str2bool, default=True, help='save model when improve')
 
     # 前處理
     parser.add_argument('--img_height', type=int, default=128) # 32 倍數
@@ -195,7 +195,8 @@ def save_model(args, model):
 def train_model(args, log, model, dataloaders_dict, criterion, optimizer, scheduler):
     num_epochs, patience = args.max_epoch, args.patience
 
-    best_acc = 0.0
+    # best_acc = 0.0
+    best_loss = float('inf')
     wait = 0
     reuslt_ls = []
     for epoch in range(num_epochs):
@@ -249,14 +250,16 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
         reuslt_ls.append(epoch_result_dt)
         scheduler.step()
 
-        if epoch_acc > best_acc:
+        if epoch_loss < best_loss:
             best_model_wts = model.state_dict()
             log_string(log, f'-> Val Accuracy improve from {best_acc:.4f} to {epoch_acc:.4f}, saving model')
 
             if args.auto_save_model:
+                a = time.time()
                 save_model(args, model)
+                print(time.time() - a)
 
-            best_acc = epoch_acc
+            best_loss = epoch_loss
             wait = 0
         else:
             wait += 1
