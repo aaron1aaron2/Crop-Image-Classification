@@ -7,7 +7,7 @@ Describe: 工具箱
 """
 import json
 import argparse
-
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 from matplotlib.pyplot import MultipleLocator
@@ -54,3 +54,11 @@ def plot_train_val_loss(train_total_loss, val_total_loss, file_path):
 
 
     plt.savefig(file_path)
+
+
+def to_prob(nums):
+    nums = np.array(nums)
+    nums = nums + abs(nums.min())
+    nums = nums / nums.sum()
+    
+    return nums.tolist()
