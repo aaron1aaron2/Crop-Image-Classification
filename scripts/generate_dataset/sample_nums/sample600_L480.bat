@@ -1,0 +1,11 @@
+python scripts/image_process.py ^
+    --file_folder data/predata ^
+    --class_list_path data/class_ls.txt ^
+    --img_coordinate_path data/tag_locCoor.csv ^
+    --output_folder data/sample_nums_experiment/sample600_L480 ^
+    --sample True ^
+    --sample_num_per_class 600 ^
+    --crop_length 480 ^
+    --train_ratio 0.7 ^
+    --val_ratio 0.1 ^
+    --test_ratio 0.2
