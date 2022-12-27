@@ -22,3 +22,50 @@ model loaded!
 ====================
 calculating evaluation...
 images numbers: train(231) | val(33) | test(66)
+[train]
+loss: 4.0
+acc: 0.0736
+timeuse: 15.0116
+Weighted_Precision: 0.0174
+Balanced_acc: 0.0736
+f1_micro: 0.0736
+f1_macro: 0.0263
+f1_weighted: 0.0263
+Top_3_acc: 0.1645
+Top_5_acc: 0.2511
+Top_10_acc: 0.3853
+roc_auc_score(ovr): 0.6716
+roc_auc_score(ovo): 0.6716
+
+[val]
+loss: 4.0671
+acc: 0.0
+timeuse: 0.179
+Weighted_Precision: 0.0
+Balanced_acc: 0.0
+f1_micro: 0.0
+f1_macro: 0.0
+f1_weighted: 0.0
+Top_3_acc: 0.0909
+Top_5_acc: 0.1818
+Top_10_acc: 0.3636
+roc_auc_score(ovr): 0.5824
+roc_auc_score(ovo): 0.5824
+
+[test]
+loss: 4.1485
+acc: 0.0606
+timeuse: 0.3422
+Weighted_Precision: 0.0191
+Balanced_acc: 0.0606
+f1_micro: 0.0606
+f1_macro: 0.0278
+f1_weighted: 0.0278
+Top_3_acc: 0.1667
+Top_5_acc: 0.2424
+Top_10_acc: 0.3939
+roc_auc_score(ovr): 0.5768
+roc_auc_score(ovo): 0.5768
+
+finished!!!
+
