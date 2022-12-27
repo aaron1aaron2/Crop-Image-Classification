@@ -142,7 +142,7 @@ def log_system_info(args, log):
                 f"Platform type: {platform.platform()}\n" + \
                 f"Number of physical cores: {psutil.cpu_count(logical=False)}\n" + \
                 f"Number of logical cores: {psutil.cpu_count(logical=True)}\n" + \
-                f"Max CPU frequency: {psutil.cpu_freq().max}\n"
+                f"Max CPU frequency: {psutil.cpu_freq().max if psutil.cpu_freq() else 'unknow'}\n"
 
     cuda_divice = torch.cuda.get_device_name() if torch.cuda.is_available() else 'CPU'
     message += f'Train with the {args.device}({cuda_divice})\n'
