@@ -55,6 +55,13 @@ def plot_train_val_loss(train_total_loss, val_total_loss, file_path):
 
     plt.savefig(file_path)
 
+def pretty_dict(d, decimal=4):
+    msg = '' 
+    for key, value in d.items():
+        value = round(value, decimal)
+        msg += f'{key}: {value}\n'
+
+    return msg
 
 def to_prob(nums):
     nums = np.array(nums)
