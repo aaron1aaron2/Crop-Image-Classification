@@ -37,7 +37,7 @@ from tqdm import tqdm
 from torchvision import datasets, transforms
 
 from utils.utils import *
-from utils.eval_metrics import get_evaluation, plot_confusion_matrix
+from utils.eval_metrics import get_evaluation
 from model.coatnet import CoAtNet
 
 
