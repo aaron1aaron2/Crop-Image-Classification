@@ -45,7 +45,7 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     # 輸入
-    parser.add_argument('--data_folder', type=str, default='data/test_sample10_L96')
+    parser.add_argument('--data_folder', type=str, default='data/sample10_L96(test)')
 
     # 輸出
     parser.add_argument('--output_folder', type=str, default='output/test_sample')
@@ -53,8 +53,8 @@ def get_args():
     parser.add_argument('--auto_save_model', type=str2bool, default=True, help='save model when improve')
 
     # 前處理
-    parser.add_argument('--img_height', type=int, default=128) # 32 倍數
-    parser.add_argument('--img_width', type=int, default=128) # 32 倍數
+    parser.add_argument('--img_height', type=int, default=96) # 32 倍數
+    parser.add_argument('--img_width', type=int, default=96) # 32 倍數
     parser.add_argument('--img_nor_mean', type=float, nargs='+', default=(0.4914, 0.4822, 0.4465), help='mean in torchvision.transforms.Normalize')
     parser.add_argument('--img_nor_std', type=float, nargs='+', default=(0.2023, 0.1994, 0.2010), help='std in torchvision.transforms.Normalize')
 
@@ -252,12 +252,12 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
 
         if epoch_loss < best_loss:
             best_model_wts = model.state_dict()
-            log_string(log, f'-> Val Accuracy improve from {best_acc:.4f} to {epoch_acc:.4f}, saving model')
+            # log_string(log, f'-> Val Accuracy improve from {best_acc:.4f} to {epoch_acc:.4f}, saving model')
+            log_string(log, f'-> Val Loss decrease from {best_loss:.4f} to {epoch_loss:.4f}, saving model')
 
             if args.auto_save_model:
-                a = time.time()
                 save_model(args, model)
-                print(time.time() - a)
+                model.to(args.device)
 
             best_loss = epoch_loss
             wait = 0
@@ -283,6 +283,7 @@ def test_model(args, log, dataloaders_dict, criterion):
     idx_class_dt = {v:k for k,v in class_idx_dt.items()}
 
     evaluation_dt = {}
+    report_dt = {}
     df_pred = pd.DataFrame()
     df_model_out = pd.DataFrame()
     with torch.no_grad():
@@ -292,9 +293,9 @@ def test_model(args, log, dataloaders_dict, criterion):
             epoch_loss = 0.0
             epoch_acc = 0
 
-            Output_list = []
             Pred_list = []
             Label_list = []
+            Output_list = []
 
             dataloader = dataloaders_dict[phase]
             for item in tqdm(dataloader, leave=False):
@@ -315,17 +316,24 @@ def test_model(args, log, dataloaders_dict, criterion):
             data_size = len(dataloader.dataset)
             epoch_loss = epoch_loss / data_size
             epoch_acc = (epoch_acc.double() / data_size).tolist()
+            
+            Output_list = list(map(to_prob, Output_list)) if args.prob else None
 
             df_pred = df_pred.append(pd.DataFrame(
                 {'Label_idx':Label_list, 'Predict_idx': Pred_list, 'Phase': [phase]*len(Pred_list)}
             ))
-            df_model_out = df_model_out.append(pd.DataFrame(output.cpu(), columns=class_idx_dt.keys()))
-            
-            Output_list = list(map(to_prob, Output_list)) if args.prob else None
+
+            tmp = pd.DataFrame(Output_list, columns=class_idx_dt.keys())
+            tmp['Phase'] = phase
+            df_model_out = df_model_out.append(tmp)
 
             phase_eval_dt = {'loss':epoch_loss, 'acc':epoch_acc, 'timeuse':time.time() - start} 
-            phase_eval_dt.update(get_evaluation(Pred_list, Label_list, Output_list))
+
+            result_dt, report = get_evaluation(Pred_list, Label_list, Output_list)
+            phase_eval_dt.update(result_dt)
             evaluation_dt.update({phase:phase_eval_dt})
+
+            report_dt.update({phase:report})
 
         df_pred['Label'] = df_pred['Label_idx'].apply(lambda x: idx_class_dt[x])
         df_pred['Predict'] = df_pred['Predict_idx'].apply(lambda x: idx_class_dt[x])
@@ -333,6 +341,11 @@ def test_model(args, log, dataloaders_dict, criterion):
         df_pred.to_csv(os.path.join(args.output_folder, 'pred_and_label.csv'), index=False)
         df_model_out.to_csv(os.path.join(args.output_folder, 'model_output.csv'), index=False)
         saveJson(evaluation_dt, os.path.join(args.output_folder, 'evaluation.json'))
+        saveJson(report_dt, os.path.join(args.output_folder, 'evaluation_report.json'))
+
+        for phase in evaluation_dt:
+            res = evaluation_dt[phase]
+            log_string(log, f'[{phase}]\n' + pretty_dict(res, decimal=4))
 
 if __name__ == '__main__':
     # 參數
