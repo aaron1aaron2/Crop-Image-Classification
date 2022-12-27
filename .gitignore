@@ -1,13 +1,11 @@
 # folder
-data/rawdata(zip)/
-data/rawdata/
-data/predata/
 example_data/
 data/
 
 # file type
 *.zip
 *.ini
+*.pth
 
 # python 
 __pycache__/
