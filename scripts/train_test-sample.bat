@@ -1,8 +1,8 @@
 python train.py ^
-    --data_folder data/sample10_L96(test) ^
+    --data_folder data/sample100_L160(test) ^
     --output_folder output/sample(test) ^
-    --img_height 96 ^
-    --img_width 96 ^
+    --img_height 160 ^
+    --img_width 160 ^
     --batch_size 6 ^
     --val_batch_size 100 ^
     --max_epoch 10 ^
