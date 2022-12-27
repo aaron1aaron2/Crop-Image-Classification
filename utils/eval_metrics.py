@@ -30,8 +30,9 @@ def get_evaluation(pred, label, pred_prob):
     result_dt = {k:v(y_true=label, y_pred=pred) for k, v in metrics_dt.items()}
     if pred_prob != None:
         result_dt.update({k:v(y_true=label, y_score=pred_prob) for k, v in prob_metrics_dt.items()})
+    report = metrics.classification_report(y_true=label, y_pred=pred, output_dict=True)
 
-    return result_dt
+    return result_dt, report
 
 # y_true, y_pred -> [0, 1, 1, 0], [0, 1, 1, 1]
 metrics_dt = {
@@ -39,8 +40,7 @@ metrics_dt = {
     'Balanced_acc': metrics.balanced_accuracy_score,
     'f1_micro': functools.partial(metrics.f1_score, average='micro'),
     'f1_macro': functools.partial(metrics.f1_score, average='macro'),
-    'f1_weighted': functools.partial(metrics.f1_score, average='weighted'),
-    'report': functools.partial(metrics.classification_report, output_dict=True),
+    'f1_weighted': functools.partial(metrics.f1_score, average='weighted')
 }
 
 
