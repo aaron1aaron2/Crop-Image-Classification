@@ -5,9 +5,9 @@ python train.py ^
     --img_width 96 ^
     --batch_size 6 ^
     --val_batch_size 100 ^
-    --max_epoch 3 ^
+    --max_epoch 10 ^
     --learning_rate 0.01 ^
     --decay_epoch 2 ^
     --device gpu ^
     --pin_memory_train True ^
-    --prob False
+    --prob True
