@@ -30,7 +30,7 @@ def get_evaluation(pred, label, pred_prob):
     result_dt = {k:v(y_true=label, y_pred=pred) for k, v in metrics_dt.items()}
     if pred_prob != None:
         result_dt.update({k:v(y_true=label, y_score=pred_prob) for k, v in prob_metrics_dt.items()})
-    
+
     return result_dt
 
 # y_true, y_pred -> [0, 1, 1, 0], [0, 1, 1, 1]
@@ -41,7 +41,6 @@ metrics_dt = {
     'f1_macro': functools.partial(metrics.f1_score, average='macro'),
     'f1_weighted': functools.partial(metrics.f1_score, average='weighted'),
     'report': functools.partial(metrics.classification_report, output_dict=True),
-    'confusion_matrix': metrics.confusion_matrix
 }
 
 
