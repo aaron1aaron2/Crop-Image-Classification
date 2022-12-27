@@ -26,10 +26,10 @@ def plot_confusion_matrix(confusion_matrix, file_path, class_ls):
 
     plt.savefig(file_path)
 
-
 def get_evaluation(pred, label, pred_prob):
-    result_dt = {k:v(pred, label) for k, v in metrics_dt.items()}
-    result_dt.update({k:v(pred_prob, label) for k, v in prob_metrics_dt.items()})
+    result_dt = {k:v(y_true=label, y_pred=pred) for k, v in metrics_dt.items()}
+    if pred_prob != None:
+        result_dt.update({k:v(y_true=label, y_score=pred_prob) for k, v in prob_metrics_dt.items()})
     
     return result_dt
 
