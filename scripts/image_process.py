@@ -29,7 +29,7 @@ def get_args():
     parser.add_argument('--output_folder', type=str, default='data/sample')
 
     # parameters
-    parser.add_argument('--sample', type=bool, default=True)
+    parser.add_argument('--sample', type=str2bool, default=True)
     parser.add_argument('--sample_num_per_class', type=int, default=100)
     parser.add_argument('--sample_file', type=str, default=None, help='使用已有的 sample(image_info.csv)，確保 sample 是一樣的')
 
@@ -41,6 +41,18 @@ def get_args():
 
 
     return parser.parse_args()
+
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 
 def crop_img_target(img_path, img_name, crop_length, target_x, target_y, output):
     # read image
