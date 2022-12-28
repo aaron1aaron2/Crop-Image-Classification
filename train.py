@@ -16,6 +16,8 @@ Describe: train pipeline
     -> 在我的電腦上使用 GPU 測，記憶體用量差不多，但是 False 的時候速度比較快
 2. coatnet 模型本身限制
     -> img_height、img_width 必須是 32 倍數。(預測 5 層就要需要整除 2^5 次的長寬。)
+
+[TODO]
 3. 追蹤 dataloader 後對應的 image path
     -> 自定義 datasets.ImageFolder 的 __getitem__ 方法。(https://gist.github.com/andrewjong/6b02ff237533b3b2c554701fb53d5c4d)
 """
@@ -89,21 +91,21 @@ def get_args():
 
     return args
 
-
-class ImageFolderWithPaths(datasets.ImageFolder):
-    """
-    Custom dataset that includes image file paths. Extends
-    torchvision.datasets.ImageFolder
-    """
-    # override the __getitem__ method. this is the method that dataloader calls
-    def __getitem__(self, index):
-        # this is what ImageFolder normally returns 
-        original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
-        # the image file path
-        path = self.imgs[index][0]
-        # make a new tuple that includes original and the path
-        tuple_with_path = (original_tuple + (path,))
-        return tuple_with_path
+# # TODO
+# class ImageFolderWithPaths(datasets.ImageFolder):
+#     """
+#     Custom dataset that includes image file paths. Extends
+#     torchvision.datasets.ImageFolder
+#     """
+#     # override the __getitem__ method. this is the method that dataloader calls
+#     def __getitem__(self, index):
+#         # this is what ImageFolder normally returns 
+#         original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
+#         # the image file path
+#         path = self.imgs[index][0]
+#         # make a new tuple that includes original and the path
+#         tuple_with_path = (original_tuple + (path,))
+#         return tuple_with_path
 
 
 def check_args(args):
