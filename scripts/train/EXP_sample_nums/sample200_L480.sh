@@ -5,9 +5,9 @@ python train.py \
     --output_folder "output/sample_nums_experiment/${expnames}" \
     --img_height 480 \
     --img_width 480 \
-    --batch_size 32 \
-    --val_batch_size 100 \
-    --max_epoch 50 \
+    --batch_size 5 \
+    --val_batch_size 64 \
+    --max_epoch 10 \
     --learning_rate 0.01 \
     --decay_epoch 10 \
     --device gpu
