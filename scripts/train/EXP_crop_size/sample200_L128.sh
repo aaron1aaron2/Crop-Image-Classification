@@ -2,7 +2,7 @@
 expname='EXP_crop_size/sample200_L128'
 python train.py \
     --data_folder "data/${expname}" \
-    --output_folder "output/${expnames}" \
+    --output_folder "output/${expname}" \
     --img_height 128 \
     --img_width 128 \
     --batch_size 5 \
