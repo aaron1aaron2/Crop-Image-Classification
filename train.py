@@ -55,8 +55,8 @@ def get_args():
     parser.add_argument('--auto_save_model', type=str2bool, default=True, help='save model when improve')
 
     # 前處理
-    parser.add_argument('--img_height', type=int, default=96) # 32 倍數
-    parser.add_argument('--img_width', type=int, default=96) # 32 倍數
+    parser.add_argument('--img_height', type=int, default=96, help='resize image height') # 32 倍數
+    parser.add_argument('--img_width', type=int, default=96, help='resize image width') # 32 倍數
     parser.add_argument('--img_nor_mean', type=float, nargs='+', default=(0.4914, 0.4822, 0.4465), help='mean in torchvision.transforms.Normalize')
     parser.add_argument('--img_nor_std', type=float, nargs='+', default=(0.2023, 0.1994, 0.2010), help='std in torchvision.transforms.Normalize')
 
