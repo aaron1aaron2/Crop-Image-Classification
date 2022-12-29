@@ -11,6 +11,7 @@ import os
 import cv2
 import glob
 import tqdm
+import json
 import shutil
 import argparse
 
@@ -192,16 +193,10 @@ def main():
                 os.path.join(args.output_folder, i['split'], i['label'], i['Img'])
                 )
         except:
-            from IPython import embed
-            embed()
-            exit()
-            try:
-                cv2.imwrite(os.path.join(args.output_folder, 'error', i['Img']), f"{i['label']}_{i['Img']}")
-            except:
-                error_ls.append(i['path'])
+            error_ls.append(i)
 
-    with open(os.path.join(args.output_folder, 'error.txt'), 'w') as f:
-        f.writelines(error_ls)
+    with open(os.path.join(args.output_folder, 'error.json'), 'w', encoding='utf-8') as outfile:  
+        json.dump(error_ls, outfile, indent=2, ensure_ascii=False)
 
     if len(error_ls) == 0:
         shutil.rmtree(os.path.join(args.output_folder, 'error'), ignore_errors=True)
