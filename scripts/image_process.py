@@ -98,7 +98,7 @@ def main():
         for class_ in class_detected_ls:
             os.makedirs(os.path.join(args.output_folder, split, class_), exist_ok=True)
 
-    coor_df = pd.read_csv('data/tag_locCoor.csv', encoding='big5', usecols=['TARGET_FID', 'Img', 'target_x', 'target_y'])
+    coor_df = pd.read_csv(args.img_coordinate_path, encoding='big5', usecols=['TARGET_FID', 'Img', 'target_x', 'target_y'])
     
     with open(args.class_list_path, encoding='utf8') as f:
         CLASS_ls = [i.strip() for i in f.readlines()]
@@ -131,10 +131,11 @@ def main():
     coor_df['no_coor'] = (coor_df[['target_x', 'target_y']] == 0).all(axis=1)
 
     no_coor_ct = coor_df['no_coor'].value_counts()
+
     print('image have coordinate: {}/{} ({:.2f}%)\n'.format(
         no_coor_ct[False], 
-        no_coor_ct[True],
-        no_coor_ct[False]/no_coor_ct[True]
+        len(coor_df),
+        no_coor_ct[False]/len(coor_df)
         ))
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -146,7 +147,10 @@ def main():
     else:
         # 各類別數量上限
         if args.sample:
+            print('sampling data...')
             coor_df = coor_df.groupby('label').sample(n=args.sample_num_per_class)
+        else:
+            print('Use all data...')
 
         #  train、test、val
         train = coor_df.groupby('label').sample(frac=args.train_ratio) # frac 用比例抽
@@ -188,8 +192,13 @@ def main():
                 os.path.join(args.output_folder, i['split'], i['label'], i['Img'])
                 )
         except:
-            cv2.imwrite(os.path.join(args.output_folder, 'error', i['Img']), f"{i['label']}_{i['Img']}")
-            error_ls.append(i['path'])
+            from IPython import embed
+            embed()
+            exit()
+            try:
+                cv2.imwrite(os.path.join(args.output_folder, 'error', i['Img']), f"{i['label']}_{i['Img']}")
+            except:
+                error_ls.append(i['path'])
 
     with open(os.path.join(args.output_folder, 'error.txt'), 'w') as f:
         f.writelines(error_ls)
