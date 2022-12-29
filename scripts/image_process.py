@@ -34,6 +34,7 @@ def get_args():
     parser.add_argument('--sample_num_per_class', type=int, default=100)
     parser.add_argument('--sample_file', type=str, default=None, help='使用已有的 sample(image_info.csv)，確保 sample 是一樣的')
 
+    parser.add_argument('--crop_image', type=str2bool, default=True)
     parser.add_argument('--crop_length', type=int, default=200)
 
     parser.add_argument('--train_ratio', type=float, default=0.7)
@@ -85,6 +86,9 @@ def crop_img_target(img_path, img_name, crop_length, target_x, target_y, output)
     # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
 
     return img_name, crop_img
+
+def copy_img(in_path, out_path):
+    shutil.copyfile(in_path, out_path)
 
 def main():
     args = get_args()
@@ -181,17 +185,24 @@ def main():
 
 
     # 準心中心裁切 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    print('Croping image..\n')
+    if args.crop_image:
+        print('Croping image..\n')
+    else:
+        print('Copying image..\n')
+
     img_dt = coor_df.to_dict(orient='records')
 
     error_ls = []
     for i in tqdm.tqdm(img_dt):
         try:
-            crop_img_target(
-                i['path'], i['Img'], args.crop_length,   
-                i['target_x'], i['target_y'], 
-                os.path.join(args.output_folder, i['split'], i['label'], i['Img'])
-                )
+            if args.crop_image:
+                crop_img_target(
+                    i['path'], i['Img'], args.crop_length,   
+                    i['target_x'], i['target_y'], 
+                    os.path.join(args.output_folder, i['split'], i['label'], i['Img'])
+                    )
+            else:
+                copy_img(i['path'], os.path.join(args.output_folder, i['split'], i['label'], i['Img']))
         except:
             error_ls.append(i)
 
