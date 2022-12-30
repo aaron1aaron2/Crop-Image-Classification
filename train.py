@@ -68,7 +68,7 @@ def get_args():
     parser.add_argument('--prob', type=str2bool, default=True, help='The output of the last layer is converted into a probability')  # python arg.py -l 2 2 12 28 2
 
     # 超參數
-    parser.add_argument('--batch_size', type=int, default=6,
+    parser.add_argument('--batch_size', type=int, default=12,
                         help='batch size')
     parser.add_argument('--val_batch_size', type=int, default=100,
                         help='val batch size')
@@ -160,6 +160,7 @@ def load_data(args, log, eval_stage=False):
     ])
 
     transform_eval = transforms.Compose([
+        transforms.Resize((args.img_height, args.img_width)),
         transforms.ToTensor(),
         transforms.Normalize(args.img_nor_mean, args.img_nor_std),
     ])
@@ -219,7 +220,7 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
 
             dataloader = dataloaders_dict[phase]
             for item in tqdm(dataloader, leave=False):
-                images = item[0].to(args.device).float()
+                images = item[0].to(args.device).float() # [6, 3, 64, 64]
                 classes = item[1].to(args.device).long()
                 optimizer.zero_grad()
 
