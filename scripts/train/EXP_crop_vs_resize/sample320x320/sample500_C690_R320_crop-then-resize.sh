@@ -10,4 +10,5 @@ python train.py \
     --max_epoch 10 \
     --learning_rate 0.01 \
     --decay_epoch 3 \
+    --decay_rate 0.5 \
     --device gpu
