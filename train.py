@@ -80,7 +80,7 @@ def get_args():
                         help='initial learning rate')
     parser.add_argument('--decay_epoch', type=int, default=10,
                         help='decay epoch')
-    parser.add_argument('--decay_rate', type=int, default=0.5,
+    parser.add_argument('--decay_rate', type=float, default=0.5,
                         help='decay epoch')
 
     # 其他
