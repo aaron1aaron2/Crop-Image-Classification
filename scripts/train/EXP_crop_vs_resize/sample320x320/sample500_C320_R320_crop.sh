@@ -5,7 +5,7 @@ python train.py \
     --output_folder "output/${expname}" \
     --img_height 320 \
     --img_width 320 \
-    --batch_size 16 \
+    --batch_size 24 \
     --val_batch_size 64 \
     --max_epoch 10 \
     --learning_rate 0.01 \
