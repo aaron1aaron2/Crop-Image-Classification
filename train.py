@@ -35,7 +35,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from torchvision import datasets, transforms
 
 from utils.utils import *
@@ -79,6 +79,8 @@ def get_args():
     parser.add_argument('--learning_rate', type=float, default=0.001,
                         help='initial learning rate')
     parser.add_argument('--decay_epoch', type=int, default=10,
+                        help='decay epoch')
+    parser.add_argument('--decay_rate', type=int, default=0.5,
                         help='decay epoch')
 
     # 其他
@@ -384,7 +386,8 @@ if __name__ == '__main__':
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
     scheduler = optim.lr_scheduler.StepLR(optimizer,
                                         step_size=args.decay_epoch,
-                                        gamma=0.9)
+                                        gamma=args.decay_rate,
+                                        verbose=True)
     
     parameters = count_parameters(model)
     log_string(log, 'trainable parameters: {:,}'.format(parameters))
