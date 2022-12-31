@@ -4,7 +4,9 @@ python scripts/image_process.py ^
     --img_coordinate_path data/tag_locCoor.csv ^
     --output_folder data/EXP_crop_vs_resize/sample500_L690_crop-then-resize ^
     --sample_file data/EXP_crop_vs_resize/sample500_Lorg_resize/image_info.csv ^
+    --crop_image True ^
     --crop_length 690 ^
+    --resize_image False ^
     --train_ratio 0.7 ^
     --val_ratio 0.1 ^
     --test_ratio 0.2

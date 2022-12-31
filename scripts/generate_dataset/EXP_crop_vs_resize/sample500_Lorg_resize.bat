@@ -6,6 +6,7 @@ python scripts/image_process.py ^
     --sample True ^
     --sample_num_per_class 500 ^
     --crop_image False ^
+    --resize_image False ^
     --train_ratio 0.7 ^
     --val_ratio 0.1 ^
     --test_ratio 0.2
