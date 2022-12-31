@@ -42,7 +42,7 @@ def get_args():
     parser.add_argument('--crop_image', type=str2bool, default=True)
     parser.add_argument('--crop_length', type=int, default=200)
 
-    parser.add_argument('--resize_image', type=str2bool, default=True)
+    parser.add_argument('--resize_image', type=str2bool, default=False)
     parser.add_argument('--resize_length', type=int, default=200)
 
     return parser.parse_args()
@@ -181,6 +181,14 @@ def main():
 
     # 準心中心裁切 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     img_dt = coor_df.to_dict(orient='records')
+    if args.crop_image & args.resize_image:
+        print('Croping then Resizing image..\n')
+    elif args.crop_image:
+        print('Croping image..\n')
+    elif args.resize_image:
+        print('Resizing image..\n')
+    else:
+        print('Copying image..\n')
 
     error_ls = []
     for i in tqdm.tqdm(img_dt):
@@ -188,21 +196,21 @@ def main():
             if (args.crop_image) | (args.resize_image):
                 # read image
                 img = cv2.imread(i['path'])
+                # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
                 if args.crop_image:
-                    print('Croping image..\n')
-                img_crop = crop_img_target(
-                    img, args.crop_length,   
-                    i['target_x'], i['target_y']
-                    )
+                    img = crop_img_target(
+                        img, args.crop_length,   
+                        i['target_x'], i['target_y']
+                        )
+                if args.resize_image:
+                    img = cv2.resize(img, (args.resize_length, args.resize_length), interpolation=cv2.INTER_AREA)
                 ## output
                 cv2.imwrite(os.path.join(args.output_folder, i['split'], i['label'], i['Img']), img_crop)
-                # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
             else:
-                print('Copying image..\n')
                 copy_img(i['path'], os.path.join(args.output_folder, i['split'], i['label'], i['Img']))
 
         except Exception as e:
-            i['error_msg'] = e
+            i['error_msg'] = str(e)
             error_ls.append(i)
 
     with open(os.path.join(args.output_folder, 'error.json'), 'w', encoding='utf-8') as outfile:  
