@@ -5,7 +5,7 @@ Create Date: 2022.12.01
 Last Update: 2022.12.03
 Describe: 資料前處理、產生訓練資料(train、val、test)
     - 抽樣方法 -> panda DataFrameGroupBy.sample
-    - 圖片剪裁方法 -> openCV
+    - 圖片剪裁 & 縮放方法 -> openCV
 """
 import os
 import cv2
@@ -29,18 +29,21 @@ def get_args():
     # output
     parser.add_argument('--output_folder', type=str, default='data/sample')
 
-    # parameters
+    # sampling parameters
     parser.add_argument('--sample', type=str2bool, default=True)
     parser.add_argument('--sample_num_per_class', type=int, default=100)
     parser.add_argument('--sample_file', type=str, default=None, help='使用已有的 sample(image_info.csv)，確保 sample 是一樣的')
-
-    parser.add_argument('--crop_image', type=str2bool, default=True)
-    parser.add_argument('--crop_length', type=int, default=200)
 
     parser.add_argument('--train_ratio', type=float, default=0.7)
     parser.add_argument('--val_ratio', type=float, default=0.1)
     parser.add_argument('--test_ratio', type=float, default=0.2)
 
+    # process parameters
+    parser.add_argument('--crop_image', type=str2bool, default=True)
+    parser.add_argument('--crop_length', type=int, default=200)
+
+    parser.add_argument('--resize_image', type=str2bool, default=True)
+    parser.add_argument('--resize_length', type=int, default=200)
 
     return parser.parse_args()
 
@@ -56,10 +59,7 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-def crop_img_target(img_path, img_name, crop_length, target_x, target_y, output):
-    # read image
-    img = cv2.imread(img_path)
-
+def crop_img_target(img, crop_length:int, target_x:int, target_y:int):
     ## img shape info
     img_h, img_w, _ = img.shape
     crop_length_half = int(crop_length/2)
@@ -81,11 +81,7 @@ def crop_img_target(img_path, img_name, crop_length, target_x, target_y, output)
 
     crop_img = img[crop_h_lower:crop_h_upper, crop_w_lower:crop_w_upper]  
 
-    ## output
-    cv2.imwrite(output, crop_img)
-    # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
-
-    return img_name, crop_img
+    return crop_img
 
 def copy_img(in_path, out_path):
     shutil.copyfile(in_path, out_path)
@@ -146,7 +142,6 @@ def main():
 
 
     # 抽樣 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
     if args.sample_file:
         coor_df = pd.read_csv(args.sample_file)
     else:
@@ -185,25 +180,29 @@ def main():
 
 
     # 準心中心裁切 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    if args.crop_image:
-        print('Croping image..\n')
-    else:
-        print('Copying image..\n')
-
     img_dt = coor_df.to_dict(orient='records')
 
     error_ls = []
     for i in tqdm.tqdm(img_dt):
         try:
-            if args.crop_image:
-                crop_img_target(
-                    i['path'], i['Img'], args.crop_length,   
-                    i['target_x'], i['target_y'], 
-                    os.path.join(args.output_folder, i['split'], i['label'], i['Img'])
+            if (args.crop_image) | (args.resize_image):
+                # read image
+                img = cv2.imread(i['path'])
+                if args.crop_image:
+                    print('Croping image..\n')
+                img_crop = crop_img_target(
+                    img, args.crop_length,   
+                    i['target_x'], i['target_y']
                     )
+                ## output
+                cv2.imwrite(os.path.join(args.output_folder, i['split'], i['label'], i['Img']), img_crop)
+                # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
             else:
+                print('Copying image..\n')
                 copy_img(i['path'], os.path.join(args.output_folder, i['split'], i['label'], i['Img']))
-        except:
+
+        except Exception as e:
+            i['error_msg'] = e
             error_ls.append(i)
 
     with open(os.path.join(args.output_folder, 'error.json'), 'w', encoding='utf-8') as outfile:  
