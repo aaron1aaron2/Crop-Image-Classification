@@ -205,7 +205,7 @@ def main():
                 if args.resize_image:
                     img = cv2.resize(img, (args.resize_length, args.resize_length), interpolation=cv2.INTER_AREA)
                 ## output
-                cv2.imwrite(os.path.join(args.output_folder, i['split'], i['label'], i['Img']), img_crop)
+                cv2.imwrite(os.path.join(args.output_folder, i['split'], i['label'], i['Img']), img)
             else:
                 copy_img(i['path'], os.path.join(args.output_folder, i['split'], i['label'], i['Img']))
 
