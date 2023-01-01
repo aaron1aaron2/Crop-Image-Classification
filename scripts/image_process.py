@@ -19,7 +19,7 @@ import pandas as pd
 
 def get_args():
     parser = argparse.ArgumentParser(add_help=False)
-    
+
     # input
     parser.add_argument('--file_folder', type=str, default='data/predata')
     parser.add_argument('--class_list_path', type=str, default='data/class_ls.txt')
@@ -107,7 +107,7 @@ def main():
     # 檢查各類別資料夾存在
     absent_data = list(set(CLASS_ls) - set(class_detected_ls))
     assert len(absent_data) == 0, f"Absent data folders under '{args.file_folder}': {absent_data}"
-    
+
     # 沒用到但是存在的資料夾
     not_used_data = list(set(class_detected_ls) - set(CLASS_ls))
     if len(not_used_data) != 0: 
@@ -123,12 +123,12 @@ def main():
         img_ls = [os.path.basename(i) for i in img_path_ls]
         label_ls = [label]*len(img_ls)
         image_info.extend(tuple(zip(label_ls, img_ls, img_path_ls)))
-    
+
     coor_df = coor_df.merge(
         pd.DataFrame(image_info, columns=['label', 'Img', 'path']),
         how='left', on='Img'
         )
-    
+
     coor_df['no_coor'] = (coor_df[['target_x', 'target_y']] == 0).all(axis=1)
 
     no_coor_ct = coor_df['no_coor'].value_counts()
