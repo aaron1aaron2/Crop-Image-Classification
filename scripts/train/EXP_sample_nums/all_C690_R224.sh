@@ -5,8 +5,8 @@ python train.py \
     --output_folder "output/${expname}" \
     --img_height 224 \
     --img_width 224 \
-    --batch_size 24 \
-    --val_batch_size 64 \
+    --batch_size 32 \
+    --val_batch_size 100 \
     --max_epoch 25 \
     --learning_rate 0.01 \
     --decay_epoch 5 \
