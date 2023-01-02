@@ -284,7 +284,6 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
     model.load_state_dict(best_model_wts)
     save_model(args, model)
 
-
     log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
 
     return reuslt_ls
