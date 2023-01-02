@@ -85,7 +85,7 @@ def get_args():
 
     # 其他
     parser.add_argument('--device', default='gpu', 
-                        help='cpu、gpu、tpu')
+                        help='cpu or cuda')
     parser.add_argument('--pin_memory_train', type=str2bool, default=False, 
                         help='argument under torch.utils.data.DataLoader')
 
@@ -112,13 +112,7 @@ def get_args():
 
 def check_args(args):
     # 新增參數
-    if args.device in ['TPU', 'tpu']:
-        args.device  = xm.xla_device()
-    elif torch.cuda.is_available() and args.device in ['gpu', 'cuda']:
-        args.device = 'cuda'
-    else:
-        args.device = 'cpu'
-
+    args.device = 'cuda' if torch.cuda.is_available() and args.device in ['gpu', 'cuda'] else 'cpu'
     args.train_folder = os.path.join(args.data_folder, 'train')
     args.test_folder = os.path.join(args.data_folder, 'test')
     args.val_folder = os.path.join(args.data_folder, 'val')
@@ -238,12 +232,7 @@ def train_model(args, log, model, dataloaders_dict, criterion, optimizer, schedu
                     _, preds = torch.max(output, 1)
                     if phase == 'train':
                         loss.backward()
-                        
-                        if args.device == 'tpu':
-                            xm.optimizer_step(optimizer, barrier=True)
-                        else:
-                            optimizer.step()
-
+                        optimizer.step()
                     epoch_loss += loss.item() * len(output)
                     epoch_acc += torch.sum(preds == classes.data)
 
@@ -366,9 +355,6 @@ if __name__ == '__main__':
     # 參數
     args = get_args()
     args = check_args(args)
-
-    if args.device in ['TPU', 'tpu']:
-        import torch_xla.core.xla_model as xm
 
     # log
     log = open(os.path.join(args.output_folder, 'log.txt'), 'w')
