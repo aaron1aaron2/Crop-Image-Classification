@@ -1,11 +1,11 @@
-# run on colab
+# run on kaggle P100
 expname='EXP_sample_nums/all_C690_R224'
 python train.py \
     --data_folder "data/${expname}" \
     --output_folder "output/${expname}" \
     --img_height 224 \
     --img_width 224 \
-    --batch_size 32 \
+    --batch_size 40 \
     --val_batch_size 100 \
     --max_epoch 25 \
     --learning_rate 0.01 \
