@@ -155,7 +155,6 @@ def log_system_info(args, log):
 
 
 def load_data(args, log, eval_stage=False):
-    transform_train = transforms.Compose([
     pre_proc_train = [transforms.RandomRotation(90)]
 
     basic_proc =  [
