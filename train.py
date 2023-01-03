@@ -59,6 +59,7 @@ def get_args():
     parser.add_argument('--img_width', type=int, default=96, help='resize image width') # 32 倍數
     parser.add_argument('--img_nor_mean', type=float, nargs='+', default=(0.4914, 0.4822, 0.4465), help='mean in torchvision.transforms.Normalize')
     parser.add_argument('--img_nor_std', type=float, nargs='+', default=(0.2023, 0.1994, 0.2010), help='std in torchvision.transforms.Normalize')
+    parser.add_argument('--img_resize', type=str2bool, default=True, help='Automatically resize image according to img_height & img_width arguments')
 
     # coatnet 參數
     parser.add_argument('--num_blocks', type=int, nargs='+', default=[2, 2, 12, 28, 2], help='Set num_blocks')  # python arg.py -l 2 2 12 28 2
@@ -155,17 +156,19 @@ def log_system_info(args, log):
 
 def load_data(args, log, eval_stage=False):
     transform_train = transforms.Compose([
-        transforms.RandomRotation(90),
-        transforms.Resize((args.img_height, args.img_width)),
-        transforms.ToTensor(),
-        transforms.Normalize(args.img_nor_mean, args.img_nor_std),
-    ])
+    pre_proc_train = [transforms.RandomRotation(90)]
 
-    transform_eval = transforms.Compose([
-        transforms.Resize((args.img_height, args.img_width)),
-        transforms.ToTensor(),
-        transforms.Normalize(args.img_nor_mean, args.img_nor_std),
-    ])
+    basic_proc =  [
+            transforms.ToTensor(),
+            transforms.Normalize(args.img_nor_mean, args.img_nor_std)
+        ]
+    if args.img_resize:
+        basic_proc = [transforms.Resize((args.img_height, args.img_width))] + basic_proc
+
+    transform_train = transforms.Compose(pre_proc_train + basic_proc)
+    transform_eval = transforms.Compose(basic_proc)
+
+    log_string(log, f'[image proccess] \n\ntrain: \n{transform_train} \n\neval: \n{transform_eval}')
 
     train_folder = datasets.ImageFolder(args.train_folder, transform=transform_train)
     val_folder = datasets.ImageFolder(args.val_folder, transform=transform_eval)
@@ -184,7 +187,7 @@ def load_data(args, log, eval_stage=False):
 
     dataloaders_dict = {"train": train_loader, "val": val_loader, 'test': test_loader}
 
-    log_string(log, f'images numbers: train({len(train_folder)}) | val({len(val_folder)}) | test({len(test_folder)})')
+    log_string(log, f'\n[images numbers] train({len(train_folder)}) | val({len(val_folder)}) | test({len(test_folder)})\n')
 
     return dataloaders_dict
 
