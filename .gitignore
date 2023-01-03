@@ -1,6 +1,7 @@
 # folder
 example_data/
 data/
+output/test*
 
 # file type
 *.zip
