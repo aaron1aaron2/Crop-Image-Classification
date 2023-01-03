@@ -9,3 +9,6 @@ data/
 
 # python 
 __pycache__/
+
+# file 
+train_tpu.py
