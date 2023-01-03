@@ -12,4 +12,4 @@ python train.py \
     --decay_epoch 5 \
     --decay_rate 0.5 \
     --patience 5 \
-    --device tpu
+    --device gpu
