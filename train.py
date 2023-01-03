@@ -95,20 +95,20 @@ def get_args():
     return args
 
 # # TODO
-# class ImageFolderWithPaths(datasets.ImageFolder):
-#     """
-#     Custom dataset that includes image file paths. Extends
-#     torchvision.datasets.ImageFolder
-#     """
-#     # override the __getitem__ method. this is the method that dataloader calls
-#     def __getitem__(self, index):
-#         # this is what ImageFolder normally returns 
-#         original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
-#         # the image file path
-#         path = self.imgs[index][0]
-#         # make a new tuple that includes original and the path
-#         tuple_with_path = (original_tuple + (path,))
-#         return tuple_with_path
+class ImageFolderWithPaths(datasets.ImageFolder):
+    """
+    Custom dataset that includes image file paths. Extends
+    torchvision.datasets.ImageFolder
+    """
+    # override the __getitem__ method. this is the method that dataloader calls
+    def __getitem__(self, index):
+        # this is what ImageFolder normally returns 
+        original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
+        # the image file path
+        path = self.imgs[index][0]
+        # make a new tuple that includes original and the path
+        tuple_with_path = (original_tuple + (path,))
+        return tuple_with_path
 
 
 def check_args(args):
@@ -169,9 +169,9 @@ def load_data(args, log, eval_stage=False):
 
     log_string(log, f'[image proccess] \n\ntrain: \n{transform_train} \n\neval: \n{transform_eval}')
 
-    train_folder = datasets.ImageFolder(args.train_folder, transform=transform_train)
-    val_folder = datasets.ImageFolder(args.val_folder, transform=transform_eval)
-    test_folder = datasets.ImageFolder(args.test_folder, transform=transform_eval)
+    train_folder = ImageFolderWithPaths(args.train_folder, transform=transform_train)
+    val_folder = ImageFolderWithPaths(args.val_folder, transform=transform_eval)
+    test_folder = ImageFolderWithPaths(args.test_folder, transform=transform_eval)
 
     # log_string(log, f'\nclass idx:\n{train_folder.class_to_idx}\n')
     saveJson(train_folder.class_to_idx, os.path.join(args.output_folder, 'class_idx.json'))
@@ -302,6 +302,7 @@ def test_model(args, log, dataloaders_dict, criterion):
             Pred_list = []
             Label_list = []
             Output_list = []
+            Path_list = []
 
             dataloader = dataloaders_dict[phase]
             for item in tqdm(dataloader, leave=False):
@@ -318,6 +319,7 @@ def test_model(args, log, dataloaders_dict, criterion):
                 Pred_list.extend(preds.tolist())
                 Label_list.extend(classes.tolist())
                 Output_list.extend(output.tolist())
+                Path_list.extend(item[2])
 
             data_size = len(dataloader.dataset)
             epoch_loss = epoch_loss / data_size
@@ -326,7 +328,8 @@ def test_model(args, log, dataloaders_dict, criterion):
             Output_list = list(map(to_prob, Output_list)) if args.prob else None
 
             df_pred = df_pred.append(pd.DataFrame(
-                {'Label_idx':Label_list, 'Predict_idx': Pred_list, 'Phase': [phase]*len(Pred_list)}
+                {'Phase': [phase]*len(Pred_list), 'Label_idx':Label_list, 
+                'Predict_idx': Pred_list, 'File_path': Path_list}
             ))
 
             tmp = pd.DataFrame(Output_list, columns=class_idx_dt.keys())
