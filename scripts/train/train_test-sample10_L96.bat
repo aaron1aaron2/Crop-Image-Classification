@@ -1,6 +1,6 @@
 python train.py ^
     --data_folder data/sample10_L96(test) ^
-    --output_folder output/sample(test) ^
+    --output_folder output/test_sample ^
     --img_height 96 ^
     --img_width 96 ^
     --batch_size 6 ^
