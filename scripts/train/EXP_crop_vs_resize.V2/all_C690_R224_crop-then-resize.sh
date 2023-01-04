@@ -1,5 +1,5 @@
 # run on kaggle P100
-expname='EXP_crop_vs_resize/all_C690_R224_crop-then-resize'
+expname='EXP_crop_vs_resize/all_C690_R224'
 python train.py \
     --data_folder "data/${expname}" \
     --output_folder "output/${expname}" \
