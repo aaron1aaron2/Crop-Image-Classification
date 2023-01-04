@@ -2,11 +2,11 @@ python scripts/image_process.py ^
     --file_folder data/predata ^
     --class_list_path data/class_ls.txt ^
     --img_coordinate_path data/tag_locCoor.csv ^
-    --output_folder data/EXP_crop_vs_resize/sample500_Lorg_resize ^
-    --sample True ^
-    --sample_num_per_class 500 ^
+    --output_folder data/EXP_crop_vs_resize.V2/all_Corg_R224_resize ^
+    --sample False ^
     --crop_image False ^
-    --resize_image False ^
+    --resize_image True ^
+    --resize_length 224 ^
     --train_ratio 0.7 ^
     --val_ratio 0.1 ^
     --test_ratio 0.2

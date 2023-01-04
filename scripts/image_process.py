@@ -41,6 +41,7 @@ def get_args():
     # process parameters
     parser.add_argument('--crop_image', type=str2bool, default=True)
     parser.add_argument('--crop_length', type=int, default=200)
+    parser.add_argument('--crop_center', type=str2bool, default=False)
 
     parser.add_argument('--resize_image', type=str2bool, default=False)
     parser.add_argument('--resize_length', type=int, default=200)
@@ -198,12 +199,12 @@ def main():
                 img = cv2.imread(i['path'])
                 # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
                 if args.crop_image:
-                    img = crop_img_target(
-                        img, args.crop_length,   
-                        i['target_x'], i['target_y']
-                        )
+                    x, y= (0, 0) if args.crop_center else (i['target_x'], i['target_y'])
+                    img = crop_img_target(img, args.crop_length, x, y)
+
                 if args.resize_image:
                     img = cv2.resize(img, (args.resize_length, args.resize_length), interpolation=cv2.INTER_AREA)
+
                 ## output
                 cv2.imwrite(os.path.join(args.output_folder, i['split'], i['label'], i['Img']), img)
             else:
