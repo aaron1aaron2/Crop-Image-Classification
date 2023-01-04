@@ -94,7 +94,6 @@ def get_args():
 
     return args
 
-# # TODO
 class ImageFolderWithPaths(datasets.ImageFolder):
     """
     Custom dataset that includes image file paths. Extends
