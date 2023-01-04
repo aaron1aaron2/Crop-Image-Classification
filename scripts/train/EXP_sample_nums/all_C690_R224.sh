@@ -1,4 +1,4 @@
-# run on kaggle P100
+# run on kaggle P100 | result same with scripts\train\EXP_sample_nums\all_C690_R224.sh
 expname='EXP_sample_nums/all_C690_R224'
 python train.py \
     --data_folder "data/${expname}" \
