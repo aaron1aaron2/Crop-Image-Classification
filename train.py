@@ -24,12 +24,14 @@ Describe: train pipeline
 import os
 import time
 import psutil
+import random
 import platform
 import argparse
 import datetime
 import warnings
 warnings.filterwarnings("ignore")
 import pandas as pd
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -93,6 +95,18 @@ def get_args():
     args = parser.parse_args()
 
     return args
+
+# 設定 seed 確保可以重現依樣結果 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+def seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
+
+g = torch.Generator()
+g.manual_seed(0)
+
+torch.manual_seed(0)
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 class ImageFolderWithPaths(datasets.ImageFolder):
     """
@@ -176,7 +190,9 @@ def load_data(args, log, eval_stage=False):
     saveJson(train_folder.class_to_idx, os.path.join(args.output_folder, 'class_idx.json'))
     
     if eval_stage:
-        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, num_workers=0, pin_memory=args.pin_memory_train)
+        train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, 
+                                    num_workers=0, pin_memory=args.pin_memory_train,
+                                    worker_init_fn=seed_worker, generator=g)
     else:
         train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.batch_size, shuffle=True, num_workers=0, pin_memory=args.pin_memory_train)
 
