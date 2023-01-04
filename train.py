@@ -180,7 +180,8 @@ def load_data(args, log, eval_stage=False):
     transform_train = transforms.Compose(pre_proc_train + basic_proc)
     transform_eval = transforms.Compose(basic_proc)
 
-    log_string(log, f'[image proccess] \n\ntrain: \n{transform_train} \n\neval: \n{transform_eval}')
+    if not eval_stage:
+        log_string(log, f'[image proccess] \n\ntrain: \n{transform_train} \n\neval: \n{transform_eval}')
 
     train_folder = ImageFolderWithPaths(args.train_folder, transform=transform_train)
     val_folder = ImageFolderWithPaths(args.val_folder, transform=transform_eval)
