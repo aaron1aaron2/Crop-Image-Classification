@@ -3,34 +3,54 @@ Author: 何彥南 (yen-nan ho)
 Email: aaron1aaron2@gmail.com
 Create Date: 2023.1.05
 Last Update: 2023.1.05
-Describe: 資料前處理、產生訓練資料(train、val、test)
-    - 抽樣方法 -> panda DataFrameGroupBy.sample
-    - 圖片剪裁 & 縮放方法 -> openCV
+Describe: 抽取圖片中的 rgb 資訊
 """
+import os
 import json
 import argparse
 import extcolors
 
 import pandas as pd
 
-from colormap import rgb2hex
+from tqdm.auto import tqdm
+# from colormap import rgb2hex
 
-img_url = "data/predata/asparagus/0a4b5fe3-c9f9-4175-a863-53759a8b7cd7.jpg"
-colors_x = extcolors.extract_from_path(img_url, tolerance = 12, limit = 12)
+def get_args():
+    parser = argparse.ArgumentParser()
 
-def color_to_df(input):
-    colors_pre_list = str(input).replace('([(','').split(', (')[0:-1]
-    df_rgb = [i.split('), ')[0] + ')' for i in colors_pre_list]
-    df_percent = [i.split('), ')[1].replace(')','') for i in colors_pre_list]
-    
-    #convert RGB to HEX code
-    df_color_up = [rgb2hex(int(i.split(", ")[0].replace("(","")),
-                            int(i.split(", ")[1]),
-                            int(i.split(", ")[2].replace(")",""))) for i in df_rgb]
-    
-    df = pd.DataFrame(zip(df_color_up, df_percent), columns = ['c_code','occurence'])
-    return df
+    parser.add_argument('--data_folder', type=str, default='data/sample10_L96(test)')
 
-df_color = color_to_df(colors_x)
-df_color
+    args = parser.parse_args()
 
+    return args
+
+if __name__ == '__main__':
+    args = get_args()
+
+    df = pd.read_csv(os.path.join(args.data_folder, 'image_info.csv'))
+
+    # from functools import partial
+    # extract_func = partial(extcolors.extract_from_path, tolerance = 12, limit = 12)
+    # extract_result = list(map(extract_func, df['path'].to_list()))
+
+    result = pd.DataFrame()
+    color_embed_dt = {}
+    for path, imgname in tqdm(df[['path', 'Img']].values):
+
+        colors_x, _ = extcolors.extract_from_path(path, tolerance = 12, limit = 12)
+        df_color = pd.DataFrame(colors_x, columns=['rgb', 'count'])
+        df_color['rate'] = df_color['count'] / df_color['count'].sum()
+        df_color['img'] = imgname
+
+        color_embed = [list(i[0]) + [i[1]] for i in df_color[['rgb', 'rate']].values]
+        color_embed_dt[imgname] = color_embed
+
+        result = pd.concat([result, df_color])
+
+    from IPython import embed
+    embed(); exit()
+
+    with open(os.path.join(args.data_folder, 'img_color.json'), 'w', encoding='utf-8') as outfile:  
+        json.dump(color_embed, outfile, indent=2, ensure_ascii=False)
+
+    result.to_csv(os.path.join(args.data_folder, 'img_color.csv'), index=False)
