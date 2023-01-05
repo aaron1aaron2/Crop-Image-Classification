@@ -1,5 +1,4 @@
 """
-
 Source: https://towardsdatascience.com/image-color-extraction-with-python-in-4-steps-8d9370d9216e
 """
 #!pip install easydev                 #version 0.12.0
