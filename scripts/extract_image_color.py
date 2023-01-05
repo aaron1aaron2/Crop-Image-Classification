@@ -21,7 +21,7 @@ import extcolors
 
 from colormap import rgb2hex
 
-
+img_url = "data/predata/asparagus/0a4b5fe3-c9f9-4175-a863-53759a8b7cd7.jpg"
 colors_x = extcolors.extract_from_path(img_url, tolerance = 12, limit = 12)
 colors_x
 
