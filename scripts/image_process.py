@@ -2,7 +2,7 @@
 Author: 何彥南 (yen-nan ho)
 Email: aaron1aaron2@gmail.com
 Create Date: 2022.12.01
-Last Update: 2022.12.03
+Last Update: 2023.1.04
 Describe: 資料前處理、產生訓練資料(train、val、test)
     - 抽樣方法 -> panda DataFrameGroupBy.sample
     - 圖片剪裁 & 縮放方法 -> openCV
