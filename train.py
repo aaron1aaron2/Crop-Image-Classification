@@ -3,7 +3,7 @@
 Author: yen-nan ho
 Contact: aaron1aaron2@gmail.com
 Create Date: 2022.12.10
-Last Update: 2022.12.19
+Last Update: 2023.1.5
 
 [Original]
 Author: 林政委
@@ -97,7 +97,7 @@ def get_args():
     return args
 
 # 設定 seed 確保可以重現依樣結果 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-def seed_worker(worker_id):
+def seed_worker():
     worker_seed = torch.initial_seed() % 2**32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
@@ -189,7 +189,7 @@ def load_data(args, log, eval_stage=False):
 
     # log_string(log, f'\nclass idx:\n{train_folder.class_to_idx}\n')
     saveJson(train_folder.class_to_idx, os.path.join(args.output_folder, 'class_idx.json'))
-    
+
     if eval_stage:
         train_loader = torch.utils.data.DataLoader(train_folder, batch_size=args.val_batch_size, shuffle=False, 
                                     num_workers=0, pin_memory=args.pin_memory_train,
