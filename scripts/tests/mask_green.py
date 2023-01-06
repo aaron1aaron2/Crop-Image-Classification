@@ -21,7 +21,5 @@ cv2.imshow('test', green)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-(mask == 255).sum()
-
 ## save 
 # cv2.imwrite("green.png", green)
