@@ -27,11 +27,13 @@ def get_args():
 if __name__ == '__main__':
     args = get_args()
 
-    df = pd.read_csv(os.path.join(args.data_folder, 'image_info.csv'))
+    path = os.path.join(args.data_folder, 'image_info.csv')
 
-    # from functools import partial
-    # extract_func = partial(extcolors.extract_from_path, tolerance = 12, limit = 12)
-    # extract_result = list(map(extract_func, df['path'].to_list()))
+    print(f'Load data from {path}\n')
+    df = pd.read_csv(path)
+
+
+    print(f'Extracting color...\n')
 
     result = pd.DataFrame()
     color_embed_dt = {}
@@ -47,10 +49,9 @@ if __name__ == '__main__':
 
         result = pd.concat([result, df_color])
 
-    from IPython import embed
-    embed(); exit()
-
-    with open(os.path.join(args.data_folder, 'img_color.json'), 'w', encoding='utf-8') as outfile:  
+    data_path =os.path.join(args.data_folder, 'img_color.json')
+    print(f'data has been stored as {data_path}')
+    with open(data_path, 'w', encoding='utf-8') as outfile:  
         json.dump(color_embed, outfile, indent=2, ensure_ascii=False)
 
     result.to_csv(os.path.join(args.data_folder, 'img_color.csv'), index=False)
