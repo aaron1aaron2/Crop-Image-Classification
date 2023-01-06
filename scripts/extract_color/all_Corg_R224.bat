@@ -1,1 +1,0 @@
-python scripts/extract_image_color.py --data_folder data/EXP_crop_vs_resize.V2/all_Corg_R224
