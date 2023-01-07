@@ -242,7 +242,6 @@ def main():
                 copy_img(i['path'], os.path.join(args.output_folder, i['split'], i['label'], i['Img']))
 
         except Exception as e:
-            print(e)
             i['error_msg'] = str(e)
             error_ls.append(i)
 
