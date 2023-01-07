@@ -16,6 +16,9 @@ import shutil
 import argparse
 
 import pandas as pd
+import numpy as np
+
+from typing import Tuple
 
 def get_args():
     parser = argparse.ArgumentParser(add_help=False)
@@ -46,6 +49,12 @@ def get_args():
     parser.add_argument('--resize_image', type=str2bool, default=False)
     parser.add_argument('--resize_length', type=int, default=200)
 
+    parser.add_argument('--mask_image', type=str2bool, default=False)
+    parser.add_argument('--mask_lower', type=int, nargs='+', default=(10, 0, 0), 
+                            help='hsv lowerBound')
+    parser.add_argument('--mask_upper', type=int, nargs='+', default=(80, 255, 255), 
+                            help='hsv upperBound')
+
     return parser.parse_args()
 
 
@@ -60,7 +69,7 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-def crop_img_target(img, crop_length:int, target_x:int, target_y:int):
+def crop_img_target(img:np.ndarray, crop_length:int, target_x:int, target_y:int) -> np.ndarray:
     ## img shape info
     img_h, img_w, _ = img.shape
     crop_length_half = int(crop_length/2)
@@ -84,7 +93,21 @@ def crop_img_target(img, crop_length:int, target_x:int, target_y:int):
 
     return crop_img
 
-def copy_img(in_path, out_path):
+def mask_img(img:np.ndarray, lower:Tuple[int, ...], upper:Tuple[int, ...]) -> np.ndarray:
+    ## convert to hsv
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    ## mask of green (36,25,25) ~ (86, 255,255)
+    mask = cv2.inRange(hsv, tuple(lower), tuple(upper))
+
+    ## slice the green
+    imask = mask > 0
+    result = np.zeros_like(img, np.uint8)
+    result[imask] = img[imask]
+
+    return result
+
+def copy_img(in_path:str, out_path:str) -> None:
     shutil.copyfile(in_path, out_path)
 
 def main():
@@ -144,6 +167,7 @@ def main():
 
     # 抽樣 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     if args.sample_file:
+        print(f'Load sample from: {args.sample_file}\n')
         coor_df = pd.read_csv(args.sample_file)
     else:
         # 各類別數量上限
@@ -182,12 +206,9 @@ def main():
 
     # 準心中心裁切 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     img_dt = coor_df.to_dict(orient='records')
-    if args.crop_image & args.resize_image:
-        print('Croping then Resizing image..\n')
-    elif args.crop_image:
-        print('Croping image..\n')
-    elif args.resize_image:
-        print('Resizing image..\n')
+    if args.crop_image | args.resize_image | args.mask_image:
+        print('Image processing...')
+        print(f'Croping({args.crop_image}) -> Resizing({args.resize_image}) -> Masking({args.mask_image})\n')
     else:
         print('Copying image..\n')
 
@@ -197,20 +218,31 @@ def main():
             if (args.crop_image) | (args.resize_image):
                 # read image
                 img = cv2.imread(i['path'])
-                # cv2.imwrite(output.replace('.jpg', '_org.jpg'), img)
+                
+                # crop image
                 if args.crop_image:
-                    x, y= (0, 0) if args.crop_center else (i['target_x'], i['target_y'])
+                    x, y = (0, 0) if args.crop_center else (i['target_x'], i['target_y'])
                     img = crop_img_target(img, args.crop_length, x, y)
 
+                # resize image
                 if args.resize_image:
-                    img = cv2.resize(img, (args.resize_length, args.resize_length), interpolation=cv2.INTER_AREA)
+                    img = cv2.resize(
+                            src=img, 
+                            dsize=(args.resize_length, args.resize_length), 
+                            interpolation=cv2.INTER_AREA
+                            )
+                
+                # mask image
+                if args.mask_image:
+                    img = mask_img(img, args.mask_lower, args.mask_upper)
 
-                ## output
+                # output
                 cv2.imwrite(os.path.join(args.output_folder, i['split'], i['label'], i['Img']), img)
             else:
                 copy_img(i['path'], os.path.join(args.output_folder, i['split'], i['label'], i['Img']))
 
         except Exception as e:
+            print(e)
             i['error_msg'] = str(e)
             error_ls.append(i)
 
