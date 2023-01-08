@@ -1,0 +1,162 @@
+====================
+[arguments]
+auto_save_model=True, batch_size=40, channels=[64, 64, 128, 256, 512], data_folder='data/EXP_color_mask/all_Corg_R224_mask-sky', decay_epoch=5, decay_rate=0.5, device='cuda', fig_folder='output/EXP_color_mask/all_Corg_R224_mask-sky/figure', img_height=224, img_nor_mean=(0.4914, 0.4822, 0.4465), img_nor_std=(0.2023, 0.1994, 0.201), img_resize=True, img_width=224, in_channels=3, learning_rate=0.01, max_epoch=25, model_file='output/EXP_color_mask/all_Corg_R224_mask-sky/model.pth', num_blocks=[2, 2, 12, 28, 2], output_folder='output/EXP_color_mask/all_Corg_R224_mask-sky', patience=50, pin_memory_train=False, prob=True, test_folder='data/EXP_color_mask/all_Corg_R224_mask-sky/test', train_folder='data/EXP_color_mask/all_Corg_R224_mask-sky/train', train_prob=False, use_tracedmodule=True, val_batch_size=100, val_folder='data/EXP_color_mask/all_Corg_R224_mask-sky/val'
+
+[System Info]
+Computer network name: 6c4f1fc82d7c
+Machine type: x86_64
+Processor type: x86_64
+Platform type: Linux-5.15.65+-x86_64-with-debian-bullseye-sid
+Number of physical cores: 1
+Number of logical cores: 2
+Max CPU frequency: 0.0
+Train with the cuda(Tesla P100-PCIE-16GB)
+====================
+loading data...
+[image proccess] 
+
+train: 
+Compose(
+    RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0)
+    Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=None)
+    ToTensor()
+    Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.201))
+) 
+
+eval: 
+Compose(
+    Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=None)
+    ToTensor()
+    Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.201))
+)
+
+[images numbers] train(62648) | val(8953) | test(17900)
+
+data loaded!
+====================
+compiling model...
+trainable parameters: 28,166,064
+model loaded!
+====================
+training model...
+
+2023-01-08 03:33:47 | epoch: 1/25, train loss: 28843.6323, val_loss: 840.4668 | training time: 1213.7s, inference time: 68.5s
+-> Val Loss decrease from inf to 840.4668, saving model
+
+2023-01-08 03:55:19 | epoch: 2/25, train loss: 222.4859, val_loss: 90.7141 | training time: 1212.6s, inference time: 67.8s
+-> Val Loss decrease from 840.4668 to 90.7141, saving model
+
+2023-01-08 04:16:46 | epoch: 3/25, train loss: 32.6962, val_loss: 17.1135 | training time: 1208.2s, inference time: 68.0s
+-> Val Loss decrease from 90.7141 to 17.1135, saving model
+
+2023-01-08 04:38:12 | epoch: 4/25, train loss: 9.0825, val_loss: 5.4971 | training time: 1206.8s, inference time: 68.1s
+-> Val Loss decrease from 17.1135 to 5.4971, saving model
+
+2023-01-08 04:59:37 | epoch: 5/25, train loss: 3.9116, val_loss: 3.4582 | training time: 1206.2s, inference time: 68.0s
+-> Val Loss decrease from 5.4971 to 3.4582, saving model
+
+2023-01-08 05:21:00 | epoch: 6/25, train loss: 3.0643, val_loss: 3.1372 | training time: 1204.9s, inference time: 67.7s
+-> Val Loss decrease from 3.4582 to 3.1372, saving model
+
+2023-01-08 05:42:27 | epoch: 7/25, train loss: 3.0880, val_loss: 3.1154 | training time: 1207.5s, inference time: 68.9s
+-> Val Loss decrease from 3.1372 to 3.1154, saving model
+
+2023-01-08 06:03:59 | epoch: 8/25, train loss: 3.1332, val_loss: 3.3112 | training time: 1213.6s, inference time: 67.3s
+
+2023-01-08 06:25:07 | epoch: 9/25, train loss: 3.0731, val_loss: 3.1193 | training time: 1201.6s, inference time: 66.9s
+
+2023-01-08 06:46:14 | epoch: 10/25, train loss: 3.0039, val_loss: 3.2674 | training time: 1200.5s, inference time: 66.7s
+
+2023-01-08 07:07:27 | epoch: 11/25, train loss: 2.6201, val_loss: 2.6849 | training time: 1205.4s, inference time: 67.1s
+-> Val Loss decrease from 3.1154 to 2.6849, saving model
+
+2023-01-08 07:28:46 | epoch: 12/25, train loss: 2.7185, val_loss: 2.9721 | training time: 1201.4s, inference time: 66.7s
+
+2023-01-08 07:49:55 | epoch: 13/25, train loss: 2.6755, val_loss: 2.7108 | training time: 1202.3s, inference time: 66.8s
+
+2023-01-08 08:11:03 | epoch: 14/25, train loss: 2.5594, val_loss: 2.7519 | training time: 1201.2s, inference time: 66.8s
+
+2023-01-08 08:32:13 | epoch: 15/25, train loss: 2.4148, val_loss: 2.5673 | training time: 1203.1s, inference time: 66.8s
+-> Val Loss decrease from 2.6849 to 2.5673, saving model
+
+2023-01-08 08:53:30 | epoch: 16/25, train loss: 2.0220, val_loss: 1.9804 | training time: 1199.3s, inference time: 67.6s
+-> Val Loss decrease from 2.5673 to 1.9804, saving model
+
+2023-01-08 09:14:47 | epoch: 17/25, train loss: 1.9244, val_loss: 1.8218 | training time: 1200.3s, inference time: 66.9s
+-> Val Loss decrease from 1.9804 to 1.8218, saving model
+
+2023-01-08 09:36:04 | epoch: 18/25, train loss: 1.8186, val_loss: 1.7896 | training time: 1199.8s, inference time: 66.6s
+-> Val Loss decrease from 1.8218 to 1.7896, saving model
+
+2023-01-08 09:57:21 | epoch: 19/25, train loss: 1.7108, val_loss: 1.7598 | training time: 1199.8s, inference time: 66.9s
+-> Val Loss decrease from 1.7896 to 1.7598, saving model
+
+2023-01-08 10:18:38 | epoch: 20/25, train loss: 1.6123, val_loss: 1.6308 | training time: 1199.2s, inference time: 66.8s
+-> Val Loss decrease from 1.7598 to 1.6308, saving model
+
+2023-01-08 10:39:54 | epoch: 21/25, train loss: 1.3565, val_loss: 1.4289 | training time: 1199.1s, inference time: 66.6s
+-> Val Loss decrease from 1.6308 to 1.4289, saving model
+
+2023-01-08 11:01:12 | epoch: 22/25, train loss: 1.2915, val_loss: 1.4378 | training time: 1200.1s, inference time: 67.0s
+
+2023-01-08 11:22:19 | epoch: 23/25, train loss: 1.2268, val_loss: 1.3716 | training time: 1200.3s, inference time: 66.9s
+-> Val Loss decrease from 1.4289 to 1.3716, saving model
+
+2023-01-08 11:43:37 | epoch: 24/25, train loss: 1.1734, val_loss: 1.4030 | training time: 1200.4s, inference time: 66.8s
+
+2023-01-08 12:04:46 | epoch: 25/25, train loss: 1.1131, val_loss: 1.3334 | training time: 1202.5s, inference time: 66.9s
+-> Val Loss decrease from 1.3716 to 1.3334, saving model
+Training and validation are completed, and model has been stored as output/EXP_color_mask/all_Corg_R224_mask-sky/model.pth
+training finish
+
+calculating evaluation...
+
+[images numbers] train(62648) | val(8953) | test(17900)
+
+[train]
+loss: 0.9961
+acc: 0.6919
+timeuse: 479.7438
+Weighted_Precision: 0.713
+Balanced_acc: 0.6933
+f1_micro: 0.6919
+f1_macro: 0.694
+f1_weighted: 0.6937
+Top_3_acc: 0.8779
+Top_5_acc: 0.9305
+Top_10_acc: 0.9764
+roc_auc_score(ovr): 0.9609
+roc_auc_score(ovo): 0.9607
+
+[val]
+loss: 1.3334
+acc: 0.6056
+timeuse: 73.9536
+Weighted_Precision: 0.632
+Balanced_acc: 0.6062
+f1_micro: 0.6056
+f1_macro: 0.6083
+f1_weighted: 0.6084
+Top_3_acc: 0.807
+Top_5_acc: 0.877
+Top_10_acc: 0.9487
+roc_auc_score(ovr): 0.9408
+roc_auc_score(ovo): 0.9405
+
+[test]
+loss: 1.3721
+acc: 0.6022
+timeuse: 132.74
+Weighted_Precision: 0.6304
+Balanced_acc: 0.6025
+f1_micro: 0.6022
+f1_macro: 0.6053
+f1_weighted: 0.6057
+Top_3_acc: 0.8037
+Top_5_acc: 0.8722
+Top_10_acc: 0.944
+roc_auc_score(ovr): 0.9384
+roc_auc_score(ovo): 0.9382
+
+finished!!!
+

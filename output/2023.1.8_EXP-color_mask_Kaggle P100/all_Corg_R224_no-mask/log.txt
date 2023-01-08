@@ -1,0 +1,166 @@
+====================
+[arguments]
+auto_save_model=True, batch_size=40, channels=[64, 64, 128, 256, 512], data_folder='data/EXP_crop_vs_resize.V2/all_Corg_R224', decay_epoch=5, decay_rate=0.5, device='cuda', fig_folder='output/EXP_crop_vs_resize.V2/all_Corg_R224/figure', img_height=224, img_nor_mean=(0.4914, 0.4822, 0.4465), img_nor_std=(0.2023, 0.1994, 0.201), img_resize=True, img_width=224, in_channels=3, learning_rate=0.01, max_epoch=25, model_file='output/EXP_crop_vs_resize.V2/all_Corg_R224/model.pth', num_blocks=[2, 2, 12, 28, 2], output_folder='output/EXP_crop_vs_resize.V2/all_Corg_R224', patience=50, pin_memory_train=False, prob=True, test_folder='data/EXP_crop_vs_resize.V2/all_Corg_R224/test', train_folder='data/EXP_crop_vs_resize.V2/all_Corg_R224/train', train_prob=False, use_tracedmodule=True, val_batch_size=100, val_folder='data/EXP_crop_vs_resize.V2/all_Corg_R224/val'
+
+[System Info]
+Computer network name: 636d695a9eda
+Machine type: x86_64
+Processor type: x86_64
+Platform type: Linux-5.15.65+-x86_64-with-debian-bullseye-sid
+Number of physical cores: 1
+Number of logical cores: 2
+Max CPU frequency: 0.0
+Train with the cuda(Tesla P100-PCIE-16GB)
+====================
+loading data...
+[image proccess] 
+
+train: 
+Compose(
+    RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0)
+    Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=None)
+    ToTensor()
+    Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.201))
+) 
+
+eval: 
+Compose(
+    Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=None)
+    ToTensor()
+    Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.201))
+)
+
+[images numbers] train(62648) | val(8953) | test(17900)
+
+data loaded!
+====================
+compiling model...
+trainable parameters: 28,166,064
+model loaded!
+====================
+training model...
+
+2023-01-05 02:59:02 | epoch: 1/25, train loss: 9172.0362, val_loss: 203.7852 | training time: 1196.1s, inference time: 67.5s
+-> Val Loss decrease from inf to 203.7852, saving model
+
+2023-01-05 03:20:22 | epoch: 2/25, train loss: 56.8068, val_loss: 34.6746 | training time: 1203.0s, inference time: 67.3s
+-> Val Loss decrease from 203.7852 to 34.6746, saving model
+
+2023-01-05 03:41:40 | epoch: 3/25, train loss: 11.5807, val_loss: 9.3500 | training time: 1200.1s, inference time: 67.4s
+-> Val Loss decrease from 34.6746 to 9.3500, saving model
+
+2023-01-05 04:03:00 | epoch: 4/25, train loss: 4.8720, val_loss: 4.6562 | training time: 1201.6s, inference time: 67.3s
+-> Val Loss decrease from 9.3500 to 4.6562, saving model
+
+2023-01-05 04:24:19 | epoch: 5/25, train loss: 3.7880, val_loss: 3.6499 | training time: 1202.1s, inference time: 67.0s
+-> Val Loss decrease from 4.6562 to 3.6499, saving model
+
+2023-01-05 04:45:35 | epoch: 6/25, train loss: 3.2397, val_loss: 3.1709 | training time: 1200.1s, inference time: 66.7s
+-> Val Loss decrease from 3.6499 to 3.1709, saving model
+
+2023-01-05 05:06:51 | epoch: 7/25, train loss: 3.1050, val_loss: 3.1351 | training time: 1198.9s, inference time: 66.4s
+-> Val Loss decrease from 3.1709 to 3.1351, saving model
+
+2023-01-05 05:28:05 | epoch: 8/25, train loss: 2.9920, val_loss: 3.1172 | training time: 1196.8s, inference time: 66.4s
+-> Val Loss decrease from 3.1351 to 3.1172, saving model
+
+2023-01-05 05:49:15 | epoch: 9/25, train loss: 2.8675, val_loss: 2.9731 | training time: 1193.7s, inference time: 66.0s
+-> Val Loss decrease from 3.1172 to 2.9731, saving model
+
+2023-01-05 06:10:25 | epoch: 10/25, train loss: 2.8096, val_loss: 2.9693 | training time: 1193.2s, inference time: 66.4s
+-> Val Loss decrease from 2.9731 to 2.9693, saving model
+
+2023-01-05 06:31:31 | epoch: 11/25, train loss: 2.4273, val_loss: 2.6751 | training time: 1191.2s, inference time: 65.6s
+-> Val Loss decrease from 2.9693 to 2.6751, saving model
+
+2023-01-05 06:52:38 | epoch: 12/25, train loss: 2.4528, val_loss: 2.7056 | training time: 1190.3s, inference time: 66.1s
+
+2023-01-05 07:13:35 | epoch: 13/25, train loss: 2.3724, val_loss: 2.2786 | training time: 1190.9s, inference time: 66.2s
+-> Val Loss decrease from 2.6751 to 2.2786, saving model
+
+2023-01-05 07:34:43 | epoch: 14/25, train loss: 2.2226, val_loss: 2.2470 | training time: 1192.5s, inference time: 65.9s
+-> Val Loss decrease from 2.2786 to 2.2470, saving model
+
+2023-01-05 07:55:50 | epoch: 15/25, train loss: 2.1024, val_loss: 2.1518 | training time: 1190.4s, inference time: 65.9s
+-> Val Loss decrease from 2.2470 to 2.1518, saving model
+
+2023-01-05 08:16:56 | epoch: 16/25, train loss: 1.6813, val_loss: 1.8093 | training time: 1190.4s, inference time: 65.8s
+-> Val Loss decrease from 2.1518 to 1.8093, saving model
+
+2023-01-05 08:38:03 | epoch: 17/25, train loss: 1.6159, val_loss: 1.5998 | training time: 1191.7s, inference time: 65.9s
+-> Val Loss decrease from 1.8093 to 1.5998, saving model
+
+2023-01-05 08:59:12 | epoch: 18/25, train loss: 1.5318, val_loss: 1.6959 | training time: 1191.4s, inference time: 66.3s
+
+2023-01-05 09:20:10 | epoch: 19/25, train loss: 1.4650, val_loss: 1.4979 | training time: 1192.4s, inference time: 66.1s
+-> Val Loss decrease from 1.5998 to 1.4979, saving model
+
+2023-01-05 09:41:19 | epoch: 20/25, train loss: 1.4099, val_loss: 1.5280 | training time: 1192.6s, inference time: 65.8s
+
+2023-01-05 10:02:16 | epoch: 21/25, train loss: 1.1441, val_loss: 1.2992 | training time: 1191.3s, inference time: 65.8s
+-> Val Loss decrease from 1.4979 to 1.2992, saving model
+
+2023-01-05 10:23:23 | epoch: 22/25, train loss: 1.0566, val_loss: 1.2904 | training time: 1191.7s, inference time: 65.6s
+-> Val Loss decrease from 1.2992 to 1.2904, saving model
+
+2023-01-05 10:44:32 | epoch: 23/25, train loss: 0.9975, val_loss: 1.2831 | training time: 1192.0s, inference time: 66.9s
+-> Val Loss decrease from 1.2904 to 1.2831, saving model
+
+2023-01-05 11:05:42 | epoch: 24/25, train loss: 0.9425, val_loss: 1.3027 | training time: 1192.1s, inference time: 66.7s
+
+2023-01-05 11:26:42 | epoch: 25/25, train loss: 0.8847, val_loss: 1.2587 | training time: 1194.0s, inference time: 66.0s
+-> Val Loss decrease from 1.2831 to 1.2587, saving model
+Training and validation are completed, and model has been stored as output/EXP_crop_vs_resize.V2/all_Corg_R224/model.pth
+training finish
+
+calculating evaluation...
+
+[images numbers] train(62648) | val(8953) | test(17900)
+
+[train]
+loss: 0.7517
+acc: 0.7634
+timeuse: 472.5416
+Weighted_Precision: 0.7687
+Balanced_acc: 0.7628
+f1_micro: 0.7634
+f1_macro: 0.7605
+f1_weighted: 0.7616
+Top_3_acc: 0.9212
+Top_5_acc: 0.9601
+Top_10_acc: 0.9891
+roc_auc_score(ovr): 0.9735
+roc_auc_score(ovo): 0.9733
+
+[val]
+loss: 1.2587
+acc: 0.6411
+timeuse: 72.2802
+Weighted_Precision: 0.6473
+Balanced_acc: 0.6403
+f1_micro: 0.6411
+f1_macro: 0.6367
+f1_weighted: 0.6386
+Top_3_acc: 0.8316
+Top_5_acc: 0.8946
+Top_10_acc: 0.956
+roc_auc_score(ovr): 0.9486
+roc_auc_score(ovo): 0.9483
+
+[test]
+loss: 1.2683
+acc: 0.6399
+timeuse: 129.0072
+Weighted_Precision: 0.6438
+Balanced_acc: 0.6385
+f1_micro: 0.6399
+f1_macro: 0.6359
+f1_weighted: 0.6375
+Top_3_acc: 0.8264
+Top_5_acc: 0.8898
+Top_10_acc: 0.9551
+roc_auc_score(ovr): 0.9471
+roc_auc_score(ovo): 0.9469
+
+finished!!!
+
