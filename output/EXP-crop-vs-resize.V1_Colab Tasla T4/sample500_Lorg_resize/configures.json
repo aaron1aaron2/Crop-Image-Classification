@@ -1,0 +1,49 @@
+{
+  "data_folder": "data/EXP_crop_vs_resize/sample500_Lorg_resize",
+  "output_folder": "output/EXP_crop_vs_resize/sample500_Lorg_resize",
+  "use_tracedmodule": true,
+  "auto_save_model": true,
+  "img_height": 320,
+  "img_width": 320,
+  "img_nor_mean": [
+    0.4914,
+    0.4822,
+    0.4465
+  ],
+  "img_nor_std": [
+    0.2023,
+    0.1994,
+    0.201
+  ],
+  "num_blocks": [
+    2,
+    2,
+    12,
+    28,
+    2
+  ],
+  "channels": [
+    64,
+    64,
+    128,
+    256,
+    512
+  ],
+  "in_channels": 3,
+  "train_prob": false,
+  "prob": true,
+  "batch_size": 16,
+  "val_batch_size": 64,
+  "max_epoch": 10,
+  "patience": 50,
+  "learning_rate": 0.01,
+  "decay_epoch": 3,
+  "decay_rate": 0.5,
+  "device": "cuda",
+  "pin_memory_train": false,
+  "train_folder": "data/EXP_crop_vs_resize/sample500_Lorg_resize/train",
+  "test_folder": "data/EXP_crop_vs_resize/sample500_Lorg_resize/test",
+  "val_folder": "data/EXP_crop_vs_resize/sample500_Lorg_resize/val",
+  "model_file": "output/EXP_crop_vs_resize/sample500_Lorg_resize/model.pth",
+  "fig_folder": "output/EXP_crop_vs_resize/sample500_Lorg_resize/figure"
+}

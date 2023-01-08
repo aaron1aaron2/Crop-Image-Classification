@@ -1,0 +1,161 @@
+====================
+[arguments]
+auto_save_model=True, batch_size=40, channels=[64, 64, 128, 256, 512], data_folder='data/EXP_sample_nums/SP1500_C690_R224', decay_epoch=5, decay_rate=0.5, device='cuda', fig_folder='output/EXP_sample_nums/SP1500_C690_R224/figure', img_height=224, img_nor_mean=(0.4914, 0.4822, 0.4465), img_nor_std=(0.2023, 0.1994, 0.201), img_resize=True, img_width=224, in_channels=3, learning_rate=0.01, max_epoch=25, model_file='output/EXP_sample_nums/SP1500_C690_R224/model.pth', num_blocks=[2, 2, 12, 28, 2], output_folder='output/EXP_sample_nums/SP1500_C690_R224', patience=5, pin_memory_train=False, prob=True, test_folder='data/EXP_sample_nums/SP1500_C690_R224/test', train_folder='data/EXP_sample_nums/SP1500_C690_R224/train', train_prob=False, use_tracedmodule=True, val_batch_size=100, val_folder='data/EXP_sample_nums/SP1500_C690_R224/val'
+
+[System Info]
+Computer network name: d3f13b733515
+Machine type: x86_64
+Processor type: x86_64
+Platform type: Linux-5.15.65+-x86_64-with-debian-bullseye-sid
+Number of physical cores: 1
+Number of logical cores: 2
+Max CPU frequency: 0.0
+Train with the cuda(Tesla P100-PCIE-16GB)
+====================
+loading data...
+[image proccess] 
+
+train: 
+Compose(
+    RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0)
+    Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=None)
+    ToTensor()
+    Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.201))
+) 
+
+eval: 
+Compose(
+    Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=None)
+    ToTensor()
+    Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.201))
+)
+
+[images numbers] train(34650) | val(4950) | test(9900)
+
+data loaded!
+====================
+compiling model...
+trainable parameters: 28,166,064
+model loaded!
+====================
+training model...
+
+2023-01-05 06:55:51 | epoch: 1/25, train loss: 23039.2645, val_loss: 10477.0460 | training time: 674.2s, inference time: 38.1s
+-> Val Loss decrease from inf to 10477.0460, saving model
+
+2023-01-05 07:07:47 | epoch: 2/25, train loss: 3407.3459, val_loss: 278.3006 | training time: 668.2s, inference time: 37.4s
+-> Val Loss decrease from 10477.0460 to 278.3006, saving model
+
+2023-01-05 07:19:39 | epoch: 3/25, train loss: 99.5019, val_loss: 43.3575 | training time: 664.9s, inference time: 37.3s
+-> Val Loss decrease from 278.3006 to 43.3575, saving model
+
+2023-01-05 07:31:32 | epoch: 4/25, train loss: 30.6813, val_loss: 26.2018 | training time: 664.9s, inference time: 37.4s
+-> Val Loss decrease from 43.3575 to 26.2018, saving model
+
+2023-01-05 07:43:25 | epoch: 5/25, train loss: 12.3852, val_loss: 7.0925 | training time: 664.9s, inference time: 37.2s
+-> Val Loss decrease from 26.2018 to 7.0925, saving model
+
+2023-01-05 07:55:15 | epoch: 6/25, train loss: 4.4698, val_loss: 5.1526 | training time: 664.0s, inference time: 37.1s
+-> Val Loss decrease from 7.0925 to 5.1526, saving model
+
+2023-01-05 08:07:07 | epoch: 7/25, train loss: 4.1888, val_loss: 4.6288 | training time: 664.2s, inference time: 37.1s
+-> Val Loss decrease from 5.1526 to 4.6288, saving model
+
+2023-01-05 08:18:57 | epoch: 8/25, train loss: 4.0513, val_loss: 4.6600 | training time: 663.0s, inference time: 37.1s
+
+2023-01-05 08:30:36 | epoch: 9/25, train loss: 4.0145, val_loss: 4.3759 | training time: 662.2s, inference time: 36.9s
+-> Val Loss decrease from 4.6288 to 4.3759, saving model
+
+2023-01-05 08:42:24 | epoch: 10/25, train loss: 3.8153, val_loss: 4.4950 | training time: 661.4s, inference time: 36.9s
+
+2023-01-05 08:54:02 | epoch: 11/25, train loss: 3.2539, val_loss: 3.2573 | training time: 661.1s, inference time: 36.8s
+-> Val Loss decrease from 4.3759 to 3.2573, saving model
+
+2023-01-05 09:05:50 | epoch: 12/25, train loss: 3.2322, val_loss: 3.4438 | training time: 661.2s, inference time: 36.8s
+
+2023-01-05 09:17:28 | epoch: 13/25, train loss: 3.2625, val_loss: 3.2530 | training time: 661.7s, inference time: 36.8s
+-> Val Loss decrease from 3.2573 to 3.2530, saving model
+
+2023-01-05 09:29:18 | epoch: 14/25, train loss: 3.2030, val_loss: 3.2813 | training time: 662.3s, inference time: 36.7s
+
+2023-01-05 09:40:56 | epoch: 15/25, train loss: 3.1321, val_loss: 3.1155 | training time: 661.2s, inference time: 36.7s
+-> Val Loss decrease from 3.2530 to 3.1155, saving model
+
+2023-01-05 09:52:43 | epoch: 16/25, train loss: 2.7774, val_loss: 2.7020 | training time: 660.6s, inference time: 36.9s
+-> Val Loss decrease from 3.1155 to 2.7020, saving model
+
+2023-01-05 10:04:30 | epoch: 17/25, train loss: 2.7774, val_loss: 2.8777 | training time: 660.5s, inference time: 36.7s
+
+2023-01-05 10:16:07 | epoch: 18/25, train loss: 2.8134, val_loss: 2.9459 | training time: 659.7s, inference time: 36.4s
+
+2023-01-05 10:27:44 | epoch: 19/25, train loss: 2.8254, val_loss: 2.7676 | training time: 660.6s, inference time: 37.1s
+
+2023-01-05 10:39:21 | epoch: 20/25, train loss: 2.7762, val_loss: 3.0686 | training time: 660.2s, inference time: 36.8s
+
+2023-01-05 10:50:57 | epoch: 21/25, train loss: 2.4551, val_loss: 2.5654 | training time: 659.6s, inference time: 36.5s
+-> Val Loss decrease from 2.7020 to 2.5654, saving model
+
+2023-01-05 11:02:44 | epoch: 22/25, train loss: 2.4209, val_loss: 2.5187 | training time: 660.2s, inference time: 36.7s
+-> Val Loss decrease from 2.5654 to 2.5187, saving model
+
+2023-01-05 11:14:30 | epoch: 23/25, train loss: 2.3958, val_loss: 2.5149 | training time: 660.2s, inference time: 36.6s
+-> Val Loss decrease from 2.5187 to 2.5149, saving model
+
+2023-01-05 11:26:17 | epoch: 24/25, train loss: 2.3539, val_loss: 2.4090 | training time: 659.5s, inference time: 36.8s
+-> Val Loss decrease from 2.5149 to 2.4090, saving model
+
+2023-01-05 11:38:03 | epoch: 25/25, train loss: 2.2867, val_loss: 2.4419 | training time: 659.6s, inference time: 36.8s
+Training and validation are completed, and model has been stored as output/EXP_sample_nums/SP1500_C690_R224/model.pth
+training finish
+
+calculating evaluation...
+
+[images numbers] train(34650) | val(4950) | test(9900)
+
+[train]
+loss: 2.2704
+acc: 0.3494
+timeuse: 266.2551
+Weighted_Precision: 0.411
+Balanced_acc: 0.3494
+f1_micro: 0.3494
+f1_macro: 0.3391
+f1_weighted: 0.3391
+Top_3_acc: 0.5807
+Top_5_acc: 0.6961
+Top_10_acc: 0.8496
+roc_auc_score(ovr): 0.8741
+roc_auc_score(ovo): 0.8741
+
+[val]
+loss: 2.409
+acc: 0.3121
+timeuse: 44.4416
+Weighted_Precision: 0.3524
+Balanced_acc: 0.3121
+f1_micro: 0.3121
+f1_macro: 0.2995
+f1_weighted: 0.2995
+Top_3_acc: 0.5521
+Top_5_acc: 0.6622
+Top_10_acc: 0.8287
+roc_auc_score(ovr): 0.8592
+roc_auc_score(ovo): 0.8592
+
+[test]
+loss: 2.3902
+acc: 0.3281
+timeuse: 70.7609
+Weighted_Precision: 0.3739
+Balanced_acc: 0.3281
+f1_micro: 0.3281
+f1_macro: 0.3141
+f1_weighted: 0.3141
+Top_3_acc: 0.5551
+Top_5_acc: 0.6691
+Top_10_acc: 0.8287
+roc_auc_score(ovr): 0.8589
+roc_auc_score(ovo): 0.8589
+
+finished!!!
+

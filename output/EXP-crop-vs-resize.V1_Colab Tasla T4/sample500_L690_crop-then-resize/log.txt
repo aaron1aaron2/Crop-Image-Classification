@@ -1,0 +1,103 @@
+====================
+[arguments]
+auto_save_model=True, batch_size=12, channels=[64, 64, 128, 256, 512], data_folder='data/EXP_crop_vs_resize/sample500_L690_crop-then-resize', decay_epoch=3, decay_rate=0.5, device='cuda', fig_folder='output/EXP_crop_vs_resize/sample500_L690_crop-then-resize/figure', img_height=320, img_nor_mean=(0.4914, 0.4822, 0.4465), img_nor_std=(0.2023, 0.1994, 0.201), img_width=320, in_channels=3, learning_rate=0.01, max_epoch=10, model_file='output/EXP_crop_vs_resize/sample500_L690_crop-then-resize/model.pth', num_blocks=[2, 2, 12, 28, 2], output_folder='output/EXP_crop_vs_resize/sample500_L690_crop-then-resize', patience=50, pin_memory_train=False, prob=True, test_folder='data/EXP_crop_vs_resize/sample500_L690_crop-then-resize/test', train_folder='data/EXP_crop_vs_resize/sample500_L690_crop-then-resize/train', train_prob=False, use_tracedmodule=True, val_batch_size=64, val_folder='data/EXP_crop_vs_resize/sample500_L690_crop-then-resize/val'
+
+[System Info]
+Computer network name: 40d6ffdc733a
+Machine type: x86_64
+Processor type: x86_64
+Platform type: Linux-5.10.133+-x86_64-with-glibc2.27
+Number of physical cores: 1
+Number of logical cores: 2
+Max CPU frequency: unknow
+Train with the cuda(Tesla T4)
+====================
+loading data...
+images numbers: train(11550) | val(1650) | test(3300)
+data loaded!
+====================
+compiling model...
+trainable parameters: 28,346,544
+model loaded!
+====================
+training model...
+
+2022-12-31 05:35:21 | epoch: 1/10, train loss: 12845.3726, val_loss: 1600.7998 | training time: 984.7s, inference time: 63.2s
+-> Val Loss decrease from inf to 1600.7998, saving model
+
+2022-12-31 05:52:46 | epoch: 2/10, train loss: 510.2938, val_loss: 124.0690 | training time: 966.9s, inference time: 62.4s
+-> Val Loss decrease from 1600.7998 to 124.0690, saving model
+
+2022-12-31 06:10:00 | epoch: 3/10, train loss: 78.7926, val_loss: 18.6110 | training time: 958.0s, inference time: 61.6s
+-> Val Loss decrease from 124.0690 to 18.6110, saving model
+
+2022-12-31 06:27:14 | epoch: 4/10, train loss: 7.7116, val_loss: 6.4685 | training time: 958.9s, inference time: 62.1s
+-> Val Loss decrease from 18.6110 to 6.4685, saving model
+
+2022-12-31 06:44:28 | epoch: 5/10, train loss: 5.1956, val_loss: 5.3227 | training time: 958.2s, inference time: 61.5s
+-> Val Loss decrease from 6.4685 to 5.3227, saving model
+
+2022-12-31 07:01:42 | epoch: 6/10, train loss: 4.8101, val_loss: 4.6042 | training time: 959.0s, inference time: 61.7s
+-> Val Loss decrease from 5.3227 to 4.6042, saving model
+
+2022-12-31 07:18:58 | epoch: 7/10, train loss: 3.7976, val_loss: 3.8108 | training time: 959.9s, inference time: 62.2s
+-> Val Loss decrease from 4.6042 to 3.8108, saving model
+
+2022-12-31 07:36:14 | epoch: 8/10, train loss: 3.9022, val_loss: 3.9122 | training time: 960.0s, inference time: 62.2s
+
+2022-12-31 07:53:15 | epoch: 9/10, train loss: 4.0454, val_loss: 4.4545 | training time: 959.8s, inference time: 61.6s
+
+2022-12-31 08:10:16 | epoch: 10/10, train loss: 3.5890, val_loss: 3.6177 | training time: 959.9s, inference time: 61.6s
+-> Val Loss decrease from 3.8108 to 3.6177, saving model
+Training and validation are completed, and model has been stored as output/EXP_crop_vs_resize/sample500_L690_crop-then-resize/model.pth
+training finish
+
+calculating evaluation...
+images numbers: train(11550) | val(1650) | test(3300)
+[train]
+loss: 3.5105
+acc: 0.0773
+timeuse: 412.3497
+Weighted_Precision: 0.1057
+Balanced_acc: 0.0773
+f1_micro: 0.0773
+f1_macro: 0.046
+f1_weighted: 0.046
+Top_3_acc: 0.2
+Top_5_acc: 0.2986
+Top_10_acc: 0.5029
+roc_auc_score(ovr): 0.6702
+roc_auc_score(ovo): 0.6702
+
+[val]
+loss: 3.6177
+acc: 0.0733
+timeuse: 54.8521
+Weighted_Precision: 0.0964
+Balanced_acc: 0.0733
+f1_micro: 0.0733
+f1_macro: 0.0425
+f1_weighted: 0.0425
+Top_3_acc: 0.183
+Top_5_acc: 0.28
+Top_10_acc: 0.4982
+roc_auc_score(ovr): 0.6674
+roc_auc_score(ovo): 0.6674
+
+[test]
+loss: 3.6414
+acc: 0.0676
+timeuse: 109.7695
+Weighted_Precision: 0.0614
+Balanced_acc: 0.0676
+f1_micro: 0.0676
+f1_macro: 0.0392
+f1_weighted: 0.0392
+Top_3_acc: 0.1879
+Top_5_acc: 0.2852
+Top_10_acc: 0.4803
+roc_auc_score(ovr): 0.6539
+roc_auc_score(ovo): 0.6539
+
+finished!!!
+
