@@ -18,6 +18,7 @@ import pandas as pd
 from sklearn import metrics
 import matplotlib.pyplot as plt
 
+# pip install pretty_confusion_matrix
 from pretty_confusion_matrix import pp_matrix
 
 def plot_confusion_matrix(confusion_matrix, file_path, class_ls):
