@@ -16,8 +16,6 @@ Describe: train pipeline
     -> 在我的電腦上使用 GPU 測，記憶體用量差不多，但是 False 的時候速度比較快
 2. coatnet 模型本身限制
     -> img_height、img_width 必須是 32 倍數。(預測 5 層就要需要整除 2^5 次的長寬。)
-
-[TODO]
 3. 追蹤 dataloader 後對應的 image path
     -> 自定義 datasets.ImageFolder 的 __getitem__ 方法。(https://gist.github.com/andrewjong/6b02ff237533b3b2c554701fb53d5c4d)
 """
@@ -30,6 +28,7 @@ import argparse
 import datetime
 import warnings
 warnings.filterwarnings("ignore")
+
 import pandas as pd
 import numpy as np
 
