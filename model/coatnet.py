@@ -1,5 +1,6 @@
 """
-Author: 林政委
+Author: chinhsuanwu
+Source: https://github.com/chinhsuanwu/coatnet-pytorch
 Email: 
 Create Date: 2022.12.10
 Last Update: 2022.12.10
