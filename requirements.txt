@@ -3,11 +3,6 @@ numpy
 psutil
 einops
 pandas
-pretty-confusion-matrix
 matplotlib
 opencv-python #version 4.5.5.64
 scikit-learn
-easydev #version 0.12.0
-colormap #version 1.0.4
-colorgram.py #version 1.2.0
-extcolors #version 1.0.0
