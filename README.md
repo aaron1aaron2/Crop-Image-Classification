@@ -46,3 +46,16 @@ pip3 install -r requirements.txt
 
 
 ### `Step3: 開始訓練`
+# Citation
+```bibtex
+@article{dai2021coatnet,
+  title={CoAtNet: Marrying Convolution and Attention for All Data Sizes},
+  author={Dai, Zihang and Liu, Hanxiao and Le, Quoc V and Tan, Mingxing},
+  journal={arXiv preprint arXiv:2106.04803},
+  year={2021}
+}
+```
+
+# Credits
+
+Code adapted from [CoAtNet](https://github.com/chinhsuanwu/coatnet-pytorch)
