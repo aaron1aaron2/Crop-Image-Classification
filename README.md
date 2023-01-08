@@ -2,7 +2,7 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/15kOuZZaUoDG33LCQCy-qHHHROab0ViiZ?usp=sharing)
 
 # Model used
-![](doc\fig\image\Coatnet.png)
+![](doc/fig/image/Coatnet.png)
 # Reproduce
 ## 📁 Folder schema 
 ```
