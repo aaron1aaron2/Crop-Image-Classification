@@ -160,7 +160,7 @@ def main():
     print('image have coordinate: {}/{} ({:.2f}%)\n'.format(
         no_coor_ct[False], 
         len(coor_df),
-        no_coor_ct[False]/len(coor_df)
+        (no_coor_ct[False]/len(coor_df))*100
         ))
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
