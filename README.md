@@ -40,11 +40,14 @@ pip3 install torch torchvision torchaudio --extra-index-url https://download.pyt
 pip3 install -r requirements.txt
 ```
 ## 🙋 Quick start 
+這部分使用少樣本的資料，結果僅供參考
 ### `Step1: 資料準備`
 
 
 ### `Step2: 產生訓練資料`
-
+```shell
+python scripts/image_process.py
+```
 
 ### `Step3: 開始訓練`
 # Citation
