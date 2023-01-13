@@ -44,18 +44,21 @@ cd Crop-Image-Classification
 ```
 
 ### `Step2: 資料準備`
+#### 下載測試資料
 ```shell
 source scripts/download_file.sh "1ew3d6llpvj7ev1CssUbxiZ3FcANFRaOW&" "sample100_L160(test)" "data/sample100_L160(test)"
 ```
 
 也可以直接到 [Google drive](https://drive.google.com/uc?id=1ew3d6llpvj7ev1CssUbxiZ3FcANFRaOW&confirm=t) 下載，並解壓縮到 _data/sample100_L160(test)_ 底下。
 
-### `Step3: 產生訓練資料`
+#### `or`
+#### 產生訓練資料
 ```shell
 python scripts/image_process.py
 ```
 
-### `Step4: 開始訓練`
+
+### `Step3: 開始訓練`
 ```shell
 python train.py
 ```
