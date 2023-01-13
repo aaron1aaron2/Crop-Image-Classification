@@ -8,8 +8,6 @@
 ```
 Crop-Image-Classification
     |-- data 
-        |-- input: 整理過的資料，包含目標土地 & 時價登入
-        |-- train_data: 訓練用資料
 
     |-- doc: 相關文件
 
@@ -21,8 +19,6 @@ Crop-Image-Classification
 
     |-- scripts: shell or batch 腳本，包含批次跑實驗、訓練範例
 
-    |-- tests: 測試檔
-
     |- requirements.txt: python 依賴套件
     |- data_helper.py: 將輸入資料(data/input)依造參數設定檔(configs)轉換成訓練資料(data/train_data)
     |- train.py: 主要訓練程式碼
@@ -32,24 +28,38 @@ Crop-Image-Classification
 ```shell
 pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
 ```
-- 本專案是在 window 11、cuda(11.6)、pytorch(1.13.0)測試。
 - 如使用不同環境請到 [pytorch 官網](https://pytorch.org/) 選擇對應版的指令。
 
 ### `other packages`
 ```shell
 pip3 install -r requirements.txt
 ```
+
 ## 🙋 Quick start 
-這部分使用少樣本的資料，結果僅供參考
-### `Step1: 資料準備`
+這部分使用小樣本的資料，結果僅供參考
+### `Step1: Clone 程式碼`
+```shell
+git clone https://github.com/aaron1aaron2/Crop-Image-Classification.git
+cd Crop-Image-Classification
+```
 
+### `Step2: 資料準備`
+```shell
+source scripts/download_file.sh "1ew3d6llpvj7ev1CssUbxiZ3FcANFRaOW&" "sample100_L160(test)" "data/sample100_L160(test)"
+```
 
-### `Step2: 產生訓練資料`
+也可以直接到 [Google drive](https://drive.google.com/uc?id=1ew3d6llpvj7ev1CssUbxiZ3FcANFRaOW&confirm=t) 下載，並解壓縮到 _data/sample100_L160(test)_ 底下。
+
+### `Step3: 產生訓練資料`
 ```shell
 python scripts/image_process.py
 ```
 
-### `Step3: 開始訓練`
+### `Step4: 開始訓練`
+```shell
+python train.py
+```
+
 # Citation
 ```bibtex
 @article{dai2021coatnet,
