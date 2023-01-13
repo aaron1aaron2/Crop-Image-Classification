@@ -15,13 +15,22 @@ Crop-Image-Classification
 
     |-- notebook: 分析視覺化
 
-    |-- output: 輸出 log 和 model
+    |-- output: 輸出實驗的 log 和 model
 
     |-- scripts: shell or batch 腳本，包含批次跑實驗、訓練範例
+        |- generate_dataset: 各實驗使用 scripts/image_process.py 產生訓練資料
+        |- train: 使用 train.py 訓練資料的實驗參數
+        |-> check_image_size.py: 檢查圖片大小
+        |-> image_process.py: 圖片處理
+        |-> download_file.sh: 下載 google drive 資料
+        |-> sort_exp_result.py: 整理 train.py 輸出的實驗結果
+    
+    |-- utils
 
-    |- requirements.txt: python 依賴套件
-    |- data_helper.py: 將輸入資料(data/input)依造參數設定檔(configs)轉換成訓練資料(data/train_data)
-    |- train.py: 主要訓練程式碼
+    |-> requirements.txt: python 依賴套件
+    |-> train.py: 主要訓練程式碼
+    |-> LICENSE
+    |-> README.md
 ```
 ## 🖥️ Environment settings 
 ### `pytorch`
