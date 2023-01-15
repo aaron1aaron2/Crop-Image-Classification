@@ -3,6 +3,11 @@
 
 # Model used - CoAtNet
 ![](doc/fig/image/Coatnet.png)
+
+
+# Result
+![](doc/fig/image/table1.png)
+
 # Reproduce
 ## 📁 Folder schema 
 ```
