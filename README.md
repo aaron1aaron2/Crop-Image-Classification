@@ -48,9 +48,27 @@ _論文連結: https://arxiv.org/abs/2106.04803_
 在模型參數上因時間與效能限制使用原作者預設的模型。在訓練環境下，因為沒顯卡運算資源，所以 kaggle 提供的 GPU(Tesla P100-PCIE-16GB)。然而在 kaggle 上有一個 session 有12 小時的限制，所以我們將模型輸入限制在照片大小限制在 224x244，這樣就可以在時間內跑完 25 epoch。
 在資料集上將資料切分成 train(0.7)、val(0.1)、test(0.2)訓練時會使用 train 資料進入模型進行訓練，每個 epoch 會使用 val 資料進行驗證，並保留 val 結果最好的模型
 ![](doc/image/training.png)
-doc\image\training.png
-## EX1. 
+
+
+## EX1. 樣本數量
+### result
 ![](doc/image/table1.png)
+
+## EX2. Crop & Resize 方式
+![](doc/fig/crop-vs-resize_exp.png)
+### result
+![](doc/image/table2.png)
+
+
+## EX3. Mask 天空
+![](doc/fig/sky_mask_exp.png)
+### result
+![](doc/image/table3.png)
+
+## EX4. 經緯度資訊的導入
+![](doc/image/coordinate_info.png)
+### result
+提升 2% 左右
 
 # Reproduce
 ## 📁 Folder schema 
