@@ -1,12 +1,29 @@
-# Crop-Image-Classification (AIcup 2022)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/15kOuZZaUoDG33LCQCy-qHHHROab0ViiZ?usp=sharing)
+# Crop-Image-Classification (AIcup 2022 in Taiwan)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/15kOuZZaUoDG33LCQCy-qHHHROab0ViiZ?usp=sharing) 
+
+我國農地範圍廣泛，但分佈破碎，造成收集資源的人力和時間成本極高，且農業領域相對缺乏AI技術，因此本實作將會把大量已收集並標住過的農作物進行分類和預測。
+
+# Dataset
+![](doc/image/crop_data.png)
+## Info
+- `資料內容`: 現地作物調查影像，包括拍攝不良影像，例如：房屋、車輛、農機具、模糊畫面等
+- `提供單位`: 行政院農業委員會
+- `影像分類`: 含非作物共33類
+- `資料數量`: 總計10萬張以上
+- `影像解析度`: 最小1280x720 ; 最大 4000x3000
+- `檔案大小`: 總計約 170 GB
+
+## Problem
+### 1. 準心可用性
+準心為協助專家判斷作物之依據，但準心也可能產生偏移。其中非中心的準心標記有 22 %。其中只有 0.5 % 資料準心偏移中心超過 100(差不多準心大小)。且幾乎全部偏移都是在 Y 軸。
+下圖可以看到準心標記錯誤的問題，因此種照片佔極少數，所以先忽略。我們初步作法是以準心為基準往外取夠大的範圍，只要照片中有包含到準心和周遭一定範圍的作物就好。
+![](doc/fig/mark.png)
 
 # Model used - CoAtNet
-![](doc/fig/image/Coatnet.png)
-
+![](doc/image/Coatnet.png)
 
 # Result
-![](doc/fig/image/table1.png)
+![](doc/image/table1.png)
 
 # Reproduce
 ## 📁 Folder schema 
