@@ -3,11 +3,11 @@
     <img src="https://img.shields.io/github/languages/code-size/aaron1aaron2/Crop-Image-Classification">
     <img src="https://img.shields.io/github/repo-size/aaron1aaron2/Crop-Image-Classification">
     <img src="https://img.shields.io/github/languages/top/aaron1aaron2/Crop-Image-Classification">
-    <img src="https://img.shields.io/github/last-commit/aaron1aaron2/Crop-Image-Classification">
     <img src="https://img.shields.io/badge/Python-> 3.5 -brightgreen">
     <img src="https://img.shields.io/badge/Pytorch- 1.13.1 -brightgreen">
     <br>
     <img src="https://img.shields.io/github/license/aaron1aaron2/Crop-Image-Classification">
+    <img src="https://img.shields.io/github/last-commit/aaron1aaron2/Crop-Image-Classification">
     <a href="https://colab.research.google.com/drive/15kOuZZaUoDG33LCQCy-qHHHROab0ViiZ?usp=sharing">
         <img src="https://colab.research.google.com/assets/colab-badge.svg">
     </a>
