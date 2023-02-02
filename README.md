@@ -1,6 +1,6 @@
 # Crop-Image-Classification (AIcup 2022 in Taiwan)
 
-<!-- info icon -->
+<!-- info icon  -->
 <div align="center">
     <img src="https://img.shields.io/github/languages/code-size/aaron1aaron2/Crop-Image-Classification">
     <img src="https://img.shields.io/github/repo-size/aaron1aaron2/Crop-Image-Classification">
