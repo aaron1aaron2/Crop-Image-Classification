@@ -13,6 +13,7 @@
     <img src="https://img.shields.io/badge/Pytorch- 1.13.1 -brightgreen">
 </div>
 
+# Background
 我國農地範圍廣泛，但分佈破碎，造成收集資源的人力和時間成本極高，且農業領域相對缺乏AI技術，因此本實作將會把大量已收集並標住過的農作物進行分類和預測。
 
 # Dataset
